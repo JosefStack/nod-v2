@@ -9,7 +9,7 @@ import loginImage from "@/assets/signup.png";
 
 const Login = () => {
     const navigate = useNavigate();
-    const { login, isLoggingIn } = useAuthStore();
+    const { login, isLoggingIn, signInWithGithub, signInWithGoogle } = useAuthStore();
 
     const [formData, setFormData] = useState({
         input: "",
@@ -44,7 +44,7 @@ const Login = () => {
         setErrors({ ...errors, [e.target.name]: "" });
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!validate()) return;
 
@@ -151,10 +151,10 @@ const Login = () => {
 
                     {/* OAUTH BUTTONS */}
                     <div className="flex gap-3">
-                        <Button variant="outline" className="flex-1 bg-[#1a1a1a] border-gray-700 hover:bg-[#222] text-white cursor-pointer">
+                        <Button onClick={signInWithGoogle} variant="outline" className="flex-1 bg-[#1a1a1a] border-gray-700 hover:bg-[#222] text-white cursor-pointer">
                             Google
                         </Button>
-                        <Button variant="outline" className="flex-1 bg-[#1a1a1a] border-gray-700 hover:bg-[#222] text-white cursor-pointer">
+                        <Button onClick={signInWithGithub} variant="outline" className="flex-1 bg-[#1a1a1a] border-gray-700 hover:bg-[#222] text-white cursor-pointer">
                             GitHub
                         </Button>
                     </div>

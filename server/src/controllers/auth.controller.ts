@@ -3,6 +3,32 @@ import { prisma } from "../lib/prisma.ts";
 import bcrypt from "bcrypt";
 // import jwt from "jsonwebtoken";
 import { generateToken } from "../lib/utils.ts";
+import { auth } from "../lib/auth.ts";
+import { AuthRequest } from "../middleware/auth.middleware.ts";
+
+const checkAuth = async (req: AuthRequest, res: Response) => {
+
+    try {
+        const session = await auth.api.getSession({
+            headers: req.headers as any,
+        });
+
+        if (session?.user) {
+            const user = await prisma.user.findUnique({
+                where: { id: session.user.id },
+                select: { id: true, email: true, isOnboarded: true, username: true, avatar: true, bio: true },
+            });
+            
+            return res.status(200).json(user);
+        }
+        
+        return res.status(200).json(req.user || null);
+    } catch (err) {
+        console.error("Auth check error: ", err);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+
+}
 
 const signup = async (req: Request, res: Response) => {
 
@@ -27,7 +53,7 @@ const signup = async (req: Request, res: Response) => {
         });
 
         generateToken(user.id, res);
-        res.status(201).json({ user });
+        res.status(201).json(user);
     }
     catch (err) {
         console.error(err);
@@ -43,7 +69,7 @@ const signup = async (req: Request, res: Response) => {
 
 const login = async (req: Request, res: Response) => {
     const { input, password } = req.body;
-
+    console.log("Login attempt: ", input);
     try {
 
         if (!input || !password) return res.status(400).json({ message: "All fields required" });
@@ -51,7 +77,7 @@ const login = async (req: Request, res: Response) => {
         const isEmail = input.includes("@");
 
         const user = await prisma.user.findFirst({
-            where: { [isEmail ? "email" : "username"] : input }
+            where: { [isEmail ? "email" : "username"] : input },
         });
 
         
@@ -62,14 +88,7 @@ const login = async (req: Request, res: Response) => {
         if (!match) return res.status(401).json({ message: "Invalid credentials" });
 
         generateToken(user.id, res);
-        return res.status(200).json({
-            id: user.id,
-            email: user.email,
-            isOnboarded: user.isOnboarded,
-            avatar: user.avatar,
-            bio: user.bio,
-            username: user.username,
-        });
+        return res.status(200).json(user);
 
     } catch (err) {
         console.log(err);
@@ -91,4 +110,4 @@ const logout = async (req: Request, res: Response) => {
     }
 }
 
-export { signup, login, logout };
+export { signup, login, logout, checkAuth };
