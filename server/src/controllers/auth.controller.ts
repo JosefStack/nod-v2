@@ -23,7 +23,7 @@ const signup = async (req: Request, res: Response) => {
 
         const user = await prisma.user.create({
             data: { email, password: hashed },
-            select: { id: true, email: true, isOnboarded: true },
+            select: { id: true, email: true, isOnboarded: true, username: true, avatar: true, bio: true },
         });
 
         generateToken(user.id, res);
@@ -66,6 +66,9 @@ const login = async (req: Request, res: Response) => {
             id: user.id,
             email: user.email,
             isOnboarded: user.isOnboarded,
+            avatar: user.avatar,
+            bio: user.bio,
+            username: user.username,
         });
 
     } catch (err) {
