@@ -12,4 +12,4 @@ authRouter.post("/logout", logout);
 
 authRouter.get("/check", protect, (req: AuthRequest, res: Response) => res.status(200).json(req.user))
 
-export default authRouter;
+export default authRouter;  
