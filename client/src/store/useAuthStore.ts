@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import axiosInstance from "../lib/axios";
-import { toast } from "sonner";
+import { authClient } from "@/lib/authClient";
 
 interface User {
     id: string;
@@ -21,7 +21,10 @@ interface AuthStore {
     signup: (data: { email: string, password: string }) => Promise<void>;
     login: (data: { input: string, password: string }) => Promise<void>;
     logout: () => Promise<void>;
-}
+
+    signInWithGoogle: () => Promise<void>;
+    signInWithGithub: () => Promise<void>;
+};
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
     user: null,
@@ -32,9 +35,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     checkAuth: async () => {
         try {
             const response = await axiosInstance.get("/auth/check");
-            set({ user: response.data })
-            console.log(get().user);
+            set({ user: response.data})
             
+            console.log(response.data);
+
         } catch (err) {
             console.error("Auth check failed: ", err);
             set({ user: null });
@@ -77,6 +81,20 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         } catch (err: any) {
             console.log("Logout failed: ", err.response?.data?.message || err.message);
         }
+    },
+
+    signInWithGoogle: async () => {
+        await authClient.signIn.social({
+            provider: "google",
+            callbackURL: "http://localhost:5173/",
+        });
+    },
+
+    signInWithGithub: async () => {
+        await authClient.signIn.social({
+            provider: "github",
+            callbackURL: "http://localhost:5173/",
+        });
     },
 }))
 

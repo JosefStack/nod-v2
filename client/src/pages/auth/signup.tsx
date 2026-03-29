@@ -9,7 +9,7 @@ import signupImage from "@/assets/signup.png";
 
 const Signup = () => {
     const navigate = useNavigate();
-    const { signup, isSigningUp } = useAuthStore();
+    const { signup, isSigningUp, signInWithGithub, signInWithGoogle } = useAuthStore();
 
     const [formData, setFormData] = useState({
         email: "",
@@ -60,7 +60,7 @@ const Signup = () => {
         setErrors({ ...errors, [e.target.name]: "" });
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!validate()) return;
 
@@ -186,10 +186,10 @@ const Signup = () => {
 
                     {/* OAuth buttons — placeholders for now */}
                     <div className="flex gap-3">
-                        <Button variant="outline" className="flex-1 bg-[#1a1a1a] border-gray-700 hover:bg-[#222] text-white cursor-pointer">
+                        <Button onClick={signInWithGoogle} variant="outline" className="flex-1 bg-[#1a1a1a] border-gray-700 hover:bg-[#222] text-white cursor-pointer">
                             Google
                         </Button>
-                        <Button variant="outline" className="flex-1 bg-[#1a1a1a] border-gray-700 hover:bg-[#222] text-white cursor-pointer">
+                        <Button onClick={signInWithGithub} variant="outline" className="flex-1 bg-[#1a1a1a] border-gray-700 hover:bg-[#222] text-white cursor-pointer">
                             GitHub
                         </Button>
                     </div>
