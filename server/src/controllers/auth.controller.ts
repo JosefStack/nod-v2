@@ -41,7 +41,7 @@ const signup = async (req: Request, res: Response) => {
             { where: { email } }
         );
         if (exists) return res.status(409).json({ message: "Email already in use" });
-
+        
 
 
         // hashing password

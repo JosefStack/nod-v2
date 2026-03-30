@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma.ts";
-import { NetConnectOpts } from "node:net";
 
 export interface AuthRequest extends Request {
     user?: {
