@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { SquarePen, SquareRadical } from "lucide-react";
 
 interface FormData {
     username: string;
@@ -100,9 +101,9 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
                         </div>
                         <button
                             onClick={() => fileRef.current?.click()}
-                            className="absolute bottom-1 right-1 w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform"
+                            className="absolute bottom-1 right-1 w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform"
                         >
-                            ✏️
+                            <SquarePen size={16}/>
                         </button>
                         <input
                             ref={fileRef}
