@@ -117,13 +117,14 @@ const Onboarding = () => {
                     };
                 </nav>
 
-                
+
             </aside>
 
             <main className="flex-1 flex flex-col overflow-y-auto">
-                
+
                 <header className="flex items-center justify-between px-8 py-4 border-b border-gray-800/50">
-                    
+
+                    {/* mobile */}
                     <div className="flex lg:hidden items-center gap-2">
                         {STEPS.map((_, i) => (
                             <div
@@ -137,22 +138,24 @@ const Onboarding = () => {
                             />
                         ))}
                     </div>
+                    {/* mobile */}
+                    <p className="text-xs text-gray-500 lg:hidden">
+                        Step {currentStep + 1} of {STEPS.length}
+                    </p>
 
-                    
+                    {/* large */}
                     <div className="hidden lg:flex items-center gap-2 text-sm">
                         <span className="text-violet-400 font-bold uppercase tracking-widest">Onboarding</span>
                         <span className="text-gray-700">›</span>
                         <span className="text-gray-400">{STEPS[currentStep]}</span>
                     </div>
 
-                    
-                    <p className="text-xs text-gray-500 lg:hidden">
-                        Step {currentStep + 1} of {STEPS.length}
-                    </p>
+
+
                 </header>
 
-                
-                <div className="flex-1 max-w-4xl mx-auto w-full px-6 lg:px-12 py-12">
+
+                <div className="flex-1 flex flex-col justify-center max-w-4xl mx-auto w-full px-6 lg:px-12 py-12">
                     {currentStep === 0 && <WelcomeStep onNext={handleNext} />}
                     {currentStep === 1 && (
                         <AccountSetupStep

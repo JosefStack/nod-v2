@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 interface FormData {
@@ -25,14 +26,16 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const previewURL = URL.createObjectURL(file);
-
         const reader = new FileReader();
+        reader.readAsDataURL(file);
+
         reader.onloadend = () => {
+            const base64Img = reader.result;
+            console.log(base64Img);
             setFormData((prev) => ({
                 ...prev,
-                avatar: reader.result as string,
-                avatarPreview: previewURL,
+                avatar: base64Img as string,
+                avatarPreview: base64Img as string,
             }));
         }
 
@@ -46,8 +49,8 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
         if (!formData.username) {
             newErrors.username = "Username is required";
             valid = false;
-        } else if (formData.username.length < 3) {
-            newErrors.username = "Username must be at least 3 characters";
+        } else if (formData.username.length < 4) {
+            newErrors.username = "Username must be at least 4 characters";
             valid = false;
         } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
             newErrors.username = "Only letters, numbers and underscores";
@@ -68,7 +71,7 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
     };
 
     return (
-        <div>
+        <div className="">
             <div className="mb-10">
                 <h2 className="text-4xl font-extrabold text-white mb-2">
                     Create your <span className="text-violet-400">Identity</span>
@@ -78,10 +81,10 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            <div className="flex flex-col lg:flex-row gap-10">
                 {/* avatar */}
-                <div className="lg:col-span-4 flex flex-col items-center">
-                    <div className="relative group">
+                <div className="px-10 flex flex-col items-center">
+                    <div className="relative ">
                         <div className="w-40 h-40 rounded-full bg-[#24262a] overflow-hidden ring-4 ring-[#121316]">
                             {formData.avatarPreview ? (
                                 <img
@@ -113,7 +116,7 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
                 </div>
 
                 {/* fields */}
-                <div className="lg:col-span-8 space-y-6">
+                <div className="lg:col-span-8 space-y-6 ">
                     {/* username + name */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
@@ -169,15 +172,10 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
 
                     {/* actions */}
                     <div className="pt-4 flex items-center justify-between">
-                        <button onClick={onBack} className="text-gray-500 font-bold hover:text-white transition-colors">
+                        <Button onClick={onBack} className="text-gray-500 font-bold hover:text-white transition-colors">
                             Back
-                        </button>
-                        <button
-                            onClick={handleNext}
-                            className="px-10 py-4 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white font-bold shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 transition-all"
-                        >
-                            Continue →
-                        </button>
+                        </Button>
+                        <Button onClick={handleNext} className="px-10 py-6 bg-linear-to-br from-violet-500 to-violet-700 text-white font-bold shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 transition-all">Continue →</Button>
                     </div>
                 </div>
             </div>
