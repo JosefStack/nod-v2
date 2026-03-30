@@ -2,13 +2,14 @@ import { create } from "zustand";
 import axiosInstance from "../lib/axios";
 import { authClient } from "@/lib/authClient";
 
-interface User {
+export interface User {
     id: string;
     email: string;
     isOnboarded: boolean;
     username: string | null;
     avatar: string | null;
     bio: string | null;
+    name: string | null;
 };
 
 interface AuthStore {
@@ -16,6 +17,8 @@ interface AuthStore {
     isCheckingAuth: boolean;
     isSigningUp: boolean;
     isLoggingIn: boolean;
+
+    setUser: (udpatedUser: User) => void;
 
     checkAuth: () => Promise<void>;
     signup: (data: { email: string, password: string }) => Promise<void>;
@@ -31,6 +34,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     isCheckingAuth: true,
     isSigningUp: false,
     isLoggingIn: false,
+
+    setUser: (updatedUser: User ) => {
+        set({ user: updatedUser });
+    },
 
     checkAuth: async () => {
         try {
@@ -97,5 +104,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
             callbackURL: "http://localhost:5173/",
         });
     },
+
+    
 }))
 
