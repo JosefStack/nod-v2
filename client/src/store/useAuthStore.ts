@@ -37,7 +37,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
             const response = await axiosInstance.get("/auth/check");
             set({ user: response.data})
             
-            console.log(response.data);
 
         } catch (err) {
             console.error("Auth check failed: ", err);
@@ -52,9 +51,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         try {
             const response = await axiosInstance.post("/auth/signup", data);
             set({ user: response.data })
-            console.log(get().user);
+            // console.log(get().user);    
         } catch (err: any) {
             console.log("Signup failed: ", err.response?.data?.message || err.message);
+            throw new Error(err.response?.data?.message || err?.message);
         } finally {
             set({ isSigningUp: false });
         }
@@ -69,6 +69,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         } catch (err: any) {
             set({ user: null });
             console.log("Login failed: ", err.response?.data?.message || err.message);
+            throw new Error(err.response?.data?.message || err?.message || "Login failed");
         } finally {
             set({ isLoggingIn: false });
         }

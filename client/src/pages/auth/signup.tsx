@@ -69,7 +69,7 @@ const Signup = () => {
             toast.success("Account created successfully!");
             navigate("/onboarding");
         } catch (err: any) {
-            toast.error(err.response?.data?.message || "Signup failed");
+            toast.error(err.response?.data?.message || err?.message || "Signup failed");
         }
     };
 

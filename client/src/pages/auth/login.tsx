@@ -9,7 +9,7 @@ import loginImage from "@/assets/signup.png";
 
 const Login = () => {
     const navigate = useNavigate();
-    const { login, isLoggingIn, signInWithGithub, signInWithGoogle } = useAuthStore();
+    const { login, isLoggingIn, signInWithGithub, signInWithGoogle, user } = useAuthStore();
 
     const [formData, setFormData] = useState({
         input: "",
@@ -51,9 +51,13 @@ const Login = () => {
         try {
             await login({ input: formData.input, password: formData.password });
             toast.success("Logged in successfully!");
-            navigate("/");
+
+            if (!user?.isOnboarded) {
+                navigate("/onboarding");
+            }
+
         } catch (err: any) {
-            toast.error(err.response?.data?.message || "Login failed");
+            toast.error(err.response?.data?.message || err?.message || "Login failed");
         }
     };
 
