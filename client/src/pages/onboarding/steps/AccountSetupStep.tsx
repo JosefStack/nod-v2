@@ -1,8 +1,9 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { SquarePen, SquareRadical } from "lucide-react";
+import { SquarePen } from "lucide-react";
+
 
 interface FormData {
     username: string;
@@ -15,13 +16,41 @@ interface FormData {
 interface Props {
     formData: FormData;
     setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+    usernameValidation: (data: { username: string }) => Promise<void>;
     onNext: () => void;
     onBack: () => void;
 }
 
-const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
+const AccountSetupStep = ({ formData, setFormData, usernameValidation, onNext, onBack }: Props) => {
     const fileRef = useRef<HTMLInputElement>(null);
     const [errors, setErrors] = useState({ username: "", fullName: "" });
+
+    const [usernameStatus, setUsernameStatus] = useState<"available" | "taken" | "checking" | "idle">("available")
+
+    useEffect(() => {
+        const isValid = formData.username &&
+            formData.username.length >= 4 &&
+            /^[a-zA-Z0-9_.]+$/.test(formData.username) &&
+            /[a-zA-Z]/.test(formData.username) &&
+            formData.username.length <= 10
+
+        if (!isValid) {
+            setUsernameStatus("idle")
+            return;
+        }
+
+        setUsernameStatus("checking");
+        const handler = setTimeout(async () => {
+            try {
+                await usernameValidation({ username: formData.username });
+                setUsernameStatus("available")
+            } catch (err: any) {
+                setUsernameStatus("taken")
+            }
+        }, 500);
+        return () => clearTimeout(handler);
+
+    }, [formData.username, usernameValidation])
 
     const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -39,28 +68,40 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
                 avatarPreview: base64Img as string,
             }));
         }
-
-
     };
 
-    const validate = () => {
+
+
+    const validate = (value: string) => {
         const newErrors = { username: "", fullName: "" };
         let valid = true;
 
-        if (!formData.username) {
+        
+        if (!value) {
             newErrors.username = "Username is required";
             valid = false;
-        } else if (formData.username.length < 4) {
+        } else if (value.length < 4) {
             newErrors.username = "Username must be at least 4 characters";
             valid = false;
-        } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
-            newErrors.username = "Only letters, numbers and underscores";
+        } else if (!/^[a-zA-Z0-9_.]+$/.test(value)) {
+            newErrors.username = "Only letters, numbers, periods and underscores";
+            valid = false;
+        } else if (!/[a-zA-Z]/.test(value)) {
+            newErrors.username = "Requires at least one letter";
+            valid = false;
+        } else if (value.length > 10) {
+            newErrors.username = "Only 10 characters are allowed";
             valid = false;
         }
 
-        if (!formData.fullName) {
+        if (!formData.fullName || formData.fullName.trim().length === 0) {
             newErrors.fullName = "Full name is required";
             valid = false;
+        } else if (!/^[a-zA-Z\s]+$/.test(formData.fullName)) {
+            newErrors.fullName = "Name cannot contain numbers or symbols";
+            valid = false;
+        } else if (formData.username.length > 20) {
+            newErrors.username = "Only 20 characters are allowed"
         }
 
         setErrors(newErrors);
@@ -68,7 +109,7 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
     };
 
     const handleNext = () => {
-        if (validate()) onNext();
+        if (usernameStatus === "available") onNext();
     };
 
     return (
@@ -103,7 +144,7 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
                             onClick={() => fileRef.current?.click()}
                             className="absolute bottom-1 right-1 w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform"
                         >
-                            <SquarePen size={16}/>
+                            <SquarePen size={16} />
                         </button>
                         <input
                             ref={fileRef}
@@ -117,57 +158,80 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
                 </div>
 
                 {/* fields */}
-                <div className="lg:col-span-8 space-y-6 ">
+                <div className="lg:col-span-8 space-y-6">
                     {/* username + name */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                                Username
+                                Username *
                             </label>
                             <div className="relative">
                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-violet-400 font-bold">@</span>
                                 <Input
                                     value={formData.username}
-                                    onChange={(e) => setFormData((p) => ({ ...p, username: e.target.value }))}
+                                    onChange={(e) => {
+                                        setErrors((prev) => ({ ...prev, username: "" }));
+                                        setFormData((p) => ({ ...p, username: e.target.value }));
+                                        validate(e.target.value);
+                                    }}
                                     placeholder="username"
                                     className={`pl-9 bg-[#0d0e11] border-none text-white placeholder:text-gray-700 rounded-xl py-6 focus-visible:ring-violet-500/20 ${errors.username ? "ring-2 ring-red-500" : ""}`}
                                 />
                             </div>
-                            {errors.username && <p className="text-red-500 text-xs">{errors.username}</p>}
+                            {/* {errors.username && <p className="text-red-500 text-xs">{errors.username}</p>} */}
+                            {/* above one changes layout shifts cs p doesnt always exist */}
+                            <p className={`text-xs w-60
+                                    ${errors.username || usernameStatus === "taken" ? "text-red-500" : ""}
+                                    ${usernameStatus === "checking" ? "text-gray-500" : ""}
+                                    ${usernameStatus === "available" ? "text-green-500" : ""}
+                                `}>
+                                    {
+                                        errors.username ? 
+                                        errors.username
+                                        : usernameStatus === "checking" ? "Checking availability"
+                                        : usernameStatus === "available" ? "Username is available"
+                                        : usernameStatus === "taken" ? "Username is taken" : ""
+                                    }
+                            </p>
                         </div>
 
 
                         <div className="space-y-2">
                             <label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                                Full Name
+                                Full Name *
                             </label>
                             <div className="relative">
                                 <Input
                                     value={formData.fullName}
-                                    onChange={(e) => setFormData((p) => ({ ...p, fullName: e.target.value }))}
-                                    placeholder="Alex Sterling"
+                                    onChange={(e) => {
+                                        setErrors((prev) => ({ ...prev, fullName: "" }))
+                                        setFormData((prev) => ({ ...prev, fullName: e.target.value }))
+                                    }}
+                                    placeholder="Bruce Wayne"
                                     className={`bg-[#0d0e11] border-none text-white placeholder:text-gray-700 rounded-xl py-6 focus-visible:ring-violet-500/20 ${errors.fullName ? "ring-2 ring-red-500" : ""}`}
                                 />
                             </div>
-                            {errors.fullName && <p className="text-red-500 text-xs">{errors.fullName}</p>}
+                            <p className="text-red-500 text-xs w-60">{errors.fullName}</p>
                         </div>
                     </div>
 
                     {/* bio */}
                     <div className="space-y-2">
                         <label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                            Short Bio
+                            Bio
                         </label>
-                        <textarea
-                            value={formData.bio}
-                            onChange={(e) => setFormData((p) => ({ ...p, bio: e.target.value.slice(0, 160) }))}
-                            placeholder="Tell us a little about your journey..."
-                            rows={4}
-                            className="w-full px-4 py-4 rounded-xl bg-[#0d0e11] border-none text-white placeholder:text-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-violet-500/20"
-                        />
+                        <div className="relative">
+                            <textarea
+                                value={formData.bio}
+                                onChange={(e) => setFormData((p) => ({ ...p, bio: e.target.value.slice(0, 130) }))}
+                                placeholder="Tell us a little about yourself..."
+                                rows={4}
+                                className="w-full px-4 py-4 rounded-xl bg-[#0d0e11] border-none text-white placeholder:text-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+                            />
+                        </div>
                         <div className="flex justify-between text-[10px] text-gray-600">
-                            <span>Recommended: 160 characters</span>
-                            <span>{formData.bio.length}/160</span>
+                            <span>Recommended: 130 characters</span>
+                            <span className={`${formData.bio.length >= 130 ? "text-red-500" : ""}`}>{formData.bio.length}/130</span>
                         </div>
                     </div>
 

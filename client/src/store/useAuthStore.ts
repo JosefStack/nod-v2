@@ -10,6 +10,7 @@ export interface User {
     avatar: string | null;
     bio: string | null;
     name: string | null;
+    image: string | null;
 };
 
 interface AuthStore {
