@@ -56,10 +56,18 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
         } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
             newErrors.username = "Only letters, numbers and underscores";
             valid = false;
+        } else if (!/[a-zA-Z]/.test(formData.username)) {
+            newErrors.username = "Requires at least one letter";
+            valid = false;
         }
 
-        if (!formData.fullName) {
+        if (!formData.fullName || formData.fullName.trim().length === 0) {
             newErrors.fullName = "Full name is required";
+            valid = false;
+        }
+
+        if (!/^[a-zA-Z]+$/.test(formData.fullName)) {
+            newErrors.fullName = "Name cannot contain numbers or symbols";
             valid = false;
         }
 
@@ -169,7 +177,7 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
                         </div>
                         <div className="flex justify-between text-[10px] text-gray-600">
                             <span>Recommended: 130 characters</span>
-                            <span>{formData.bio.length}/130</span>
+                            <span className={`${ formData.bio.length >= 130 ? "text-red-500" : "" }`}>{formData.bio.length}/130</span>
                         </div>
                     </div>
 
