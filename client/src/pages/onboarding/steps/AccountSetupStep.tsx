@@ -59,16 +59,18 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
         } else if (!/[a-zA-Z]/.test(formData.username)) {
             newErrors.username = "Requires at least one letter";
             valid = false;
+        } else if (formData.username.length > 10) {
+            newErrors.username = "Only 10 characters are allowed"
         }
 
         if (!formData.fullName || formData.fullName.trim().length === 0) {
             newErrors.fullName = "Full name is required";
             valid = false;
-        }
-
-        if (!/^[a-zA-Z]+$/.test(formData.fullName)) {
+        } else if (!/^[a-zA-Z\s]+$/.test(formData.fullName)) {
             newErrors.fullName = "Name cannot contain numbers or symbols";
             valid = false;
+        } else if (formData.username.length > 20) {
+            newErrors.username = "Only 20 characters are allowed"
         }
 
         setErrors(newErrors);
@@ -136,12 +138,17 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-violet-400 font-bold">@</span>
                                 <Input
                                     value={formData.username}
-                                    onChange={(e) => setFormData((p) => ({ ...p, username: e.target.value }))}
+                                    onChange={(e) => {
+                                        setErrors((prev) => ({ ...prev, username: "" }))
+                                        setFormData((p) => ({ ...p, username: e.target.value }))
+                                    }}
                                     placeholder="username"
                                     className={`pl-9 bg-[#0d0e11] border-none text-white placeholder:text-gray-700 rounded-xl py-6 focus-visible:ring-violet-500/20 ${errors.username ? "ring-2 ring-red-500" : ""}`}
                                 />
                             </div>
-                            {errors.username && <p className="text-red-500 text-xs">{errors.username}</p>}
+                            {/* {errors.username && <p className="text-red-500 text-xs">{errors.username}</p>} */}
+                            {/* above one changes layout shifts cs p doesnt always exist */}
+                            <p className="text-red-500 text-xs w-60">{errors.username}</p>
                         </div>
 
 
@@ -152,12 +159,15 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
                             <div className="relative">
                                 <Input
                                     value={formData.fullName}
-                                    onChange={(e) => setFormData((p) => ({ ...p, fullName: e.target.value }))}
+                                    onChange={(e) => {
+                                        setErrors((prev) => ({ ...prev, fullName: "" }))
+                                        setFormData((p) => ({ ...p, fullName: e.target.value }))
+                                    }}
                                     placeholder="Alex Sterling"
                                     className={`bg-[#0d0e11] border-none text-white placeholder:text-gray-700 rounded-xl py-6 focus-visible:ring-violet-500/20 ${errors.fullName ? "ring-2 ring-red-500" : ""}`}
                                 />
                             </div>
-                            {errors.fullName && <p className="text-red-500 text-xs">{errors.fullName}</p>}
+                            <p className="text-red-500 text-xs w-60">{errors.fullName}</p>
                         </div>
                     </div>
 
@@ -177,7 +187,7 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
                         </div>
                         <div className="flex justify-between text-[10px] text-gray-600">
                             <span>Recommended: 130 characters</span>
-                            <span className={`${ formData.bio.length >= 130 ? "text-red-500" : "" }`}>{formData.bio.length}/130</span>
+                            <span className={`${formData.bio.length >= 130 ? "text-red-500" : ""}`}>{formData.bio.length}/130</span>
                         </div>
                     </div>
 
