@@ -48,7 +48,6 @@ const AccountSetupStep = ({ formData, setFormData, usernameValidation, onNext, o
                 setUsernameStatus("taken")
             }
         }, 500);
-
         return () => clearTimeout(handler);
 
     }, [formData.username, usernameValidation])
@@ -73,25 +72,26 @@ const AccountSetupStep = ({ formData, setFormData, usernameValidation, onNext, o
 
 
 
-    const validate = () => {
+    const validate = (value: string) => {
         const newErrors = { username: "", fullName: "" };
         let valid = true;
 
-
-        if (!formData.username) {
+        
+        if (!value) {
             newErrors.username = "Username is required";
             valid = false;
-        } else if (formData.username.length < 4) {
+        } else if (value.length < 4) {
             newErrors.username = "Username must be at least 4 characters";
             valid = false;
-        } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
-            newErrors.username = "Only letters, numbers and underscores";
+        } else if (!/^[a-zA-Z0-9_.]+$/.test(value)) {
+            newErrors.username = "Only letters, numbers, periods and underscores";
             valid = false;
-        } else if (!/[a-zA-Z]/.test(formData.username)) {
+        } else if (!/[a-zA-Z]/.test(value)) {
             newErrors.username = "Requires at least one letter";
             valid = false;
-        } else if (formData.username.length > 10) {
-            newErrors.username = "Only 10 characters are allowed"
+        } else if (value.length > 10) {
+            newErrors.username = "Only 10 characters are allowed";
+            valid = false;
         }
 
         if (!formData.fullName || formData.fullName.trim().length === 0) {
@@ -109,7 +109,7 @@ const AccountSetupStep = ({ formData, setFormData, usernameValidation, onNext, o
     };
 
     const handleNext = () => {
-        if (validate() && usernameStatus === "available") onNext();
+        if (usernameStatus === "available") onNext();
     };
 
     return (
@@ -170,8 +170,9 @@ const AccountSetupStep = ({ formData, setFormData, usernameValidation, onNext, o
                                 <Input
                                     value={formData.username}
                                     onChange={(e) => {
-                                        setErrors((prev) => ({ ...prev, username: "" }))
-                                        setFormData((p) => ({ ...p, username: e.target.value }))
+                                        setErrors((prev) => ({ ...prev, username: "" }));
+                                        setFormData((p) => ({ ...p, username: e.target.value }));
+                                        validate(e.target.value);
                                     }}
                                     placeholder="username"
                                     className={`pl-9 bg-[#0d0e11] border-none text-white placeholder:text-gray-700 rounded-xl py-6 focus-visible:ring-violet-500/20 ${errors.username ? "ring-2 ring-red-500" : ""}`}
@@ -204,9 +205,9 @@ const AccountSetupStep = ({ formData, setFormData, usernameValidation, onNext, o
                                     value={formData.fullName}
                                     onChange={(e) => {
                                         setErrors((prev) => ({ ...prev, fullName: "" }))
-                                        setFormData((p) => ({ ...p, fullName: e.target.value }))
+                                        setFormData((prev) => ({ ...prev, fullName: e.target.value }))
                                     }}
-                                    placeholder="Alex Sterling"
+                                    placeholder="Bruce Wayne"
                                     className={`bg-[#0d0e11] border-none text-white placeholder:text-gray-700 rounded-xl py-6 focus-visible:ring-violet-500/20 ${errors.fullName ? "ring-2 ring-red-500" : ""}`}
                                 />
                             </div>
@@ -217,13 +218,13 @@ const AccountSetupStep = ({ formData, setFormData, usernameValidation, onNext, o
                     {/* bio */}
                     <div className="space-y-2">
                         <label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                            Short Bio
+                            Bio
                         </label>
                         <div className="relative">
                             <textarea
                                 value={formData.bio}
                                 onChange={(e) => setFormData((p) => ({ ...p, bio: e.target.value.slice(0, 130) }))}
-                                placeholder="Tell us a little about your journey..."
+                                placeholder="Tell us a little about yourself..."
                                 rows={4}
                                 className="w-full px-4 py-4 rounded-xl bg-[#0d0e11] border-none text-white placeholder:text-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-violet-500/20"
                             />
