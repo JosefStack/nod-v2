@@ -30,7 +30,7 @@ const AccountSetupStep = ({ formData, setFormData, usernameValidation, onNext, o
     useEffect(() => {
         const isValid = formData.username &&
             formData.username.length >= 4 &&
-            /^[a-zA-Z0-9_]+$/.test(formData.username) &&
+            /^[a-zA-Z0-9_.]+$/.test(formData.username) &&
             /[a-zA-Z]/.test(formData.username) &&
             formData.username.length <= 10
 
