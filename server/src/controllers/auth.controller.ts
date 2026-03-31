@@ -16,7 +16,7 @@ const checkAuth = async (req: AuthRequest, res: Response) => {
         if (session?.user) {
             const user = await prisma.user.findUnique({
                 where: { id: session.user.id },
-                select: { id: true, email: true, isOnboarded: true, username: true, avatar: true, bio: true },
+                select: { id: true, email: true, isOnboarded: true, username: true, avatar: true, bio: true, image: true, name: true },
             });
             
             return res.status(200).json(user);
@@ -49,7 +49,7 @@ const signup = async (req: Request, res: Response) => {
 
         const user = await prisma.user.create({
             data: { email, password: hashed },
-            select: { id: true, email: true, isOnboarded: true, username: true, avatar: true, bio: true },
+            select: { id: true, email: true, isOnboarded: true, username: true, avatar: true, bio: true, image: true, name: true },
         });
 
         generateToken(user.id, res);

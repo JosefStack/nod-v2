@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 
 import { useUserStore } from "@/store/useUserStore";
-
+import { useAuthStore } from "@/store/useAuthStore";
 
 import { toast } from "sonner";
 
@@ -25,6 +25,14 @@ const STEPS: readonly string[] = ["Welcome", "Account Setup", "Terms", "Get Star
 const stepIcons = { "Welcome": Sparkles, "Account Setup": User, "Terms": FileText, "Get Started": Sparkles };
 
 const Onboarding = () => {
+
+    const { user } = useAuthStore();
+
+    useEffect(() => {
+        if (user?.image) setFormData((prev) => ({...prev, avatarPreview: user.image as string})) ;
+        if (user?.name) setFormData((prev) => ({...prev, fullName: user.name as string}))
+    }, [])
+
     const { completeOnboarding, checkUsername } = useUserStore();
     const navigate = useNavigate();
 
@@ -37,6 +45,7 @@ const Onboarding = () => {
         avatar: "",
         avatarPreview: "",
     });
+
 
     const handleNext = () => {
         setCurrentStep((prev) => Math.min(prev + 1, STEPS.length - 1));

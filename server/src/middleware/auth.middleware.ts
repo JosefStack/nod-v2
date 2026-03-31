@@ -8,6 +8,7 @@ export interface AuthRequest extends Request {
         email: string;
         username: string | null;
         isOnboarded: boolean;
+        image: string;
     }
 }
 
@@ -26,7 +27,7 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
 
         const user = await prisma.user.findUnique({
             where: { id: decoded.userId },
-            select: {id: true, email: true, username: true, isOnboarded: true,  avatar: true, bio: true},
+            select: {id: true, email: true, username: true, isOnboarded: true,  avatar: true, bio: true, image: true},
         });
 
         if (!user) return res.status(401).json({ message: "Unauthorized - User not found" });

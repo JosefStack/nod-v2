@@ -6,7 +6,6 @@ import { useAuthStore } from "./useAuthStore";
 interface UserStore {
     checkUsername: (data: { username: string }) => Promise<void>;
     completeOnboarding: (data: { username: string, avatar: string | null, bio: string | null, fullName: string }) => Promise<void>;
-
 }
 
 export const useUserStore = create<UserStore>((set, get) => ({
@@ -31,8 +30,6 @@ export const useUserStore = create<UserStore>((set, get) => ({
             throw new Error(err.response?.data?.message || err?.message || "Onboarding failed");    
         }
     }
-
-
 
 }));    
 

@@ -81,4 +81,4 @@ export const checkUsername = async (req: AuthRequest, res: Response) => {
     }
 
 
-}
+};
