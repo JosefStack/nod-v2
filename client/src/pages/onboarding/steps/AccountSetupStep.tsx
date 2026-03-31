@@ -103,7 +103,7 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
                             onClick={() => fileRef.current?.click()}
                             className="absolute bottom-1 right-1 w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform"
                         >
-                            <SquarePen size={16}/>
+                            <SquarePen size={16} />
                         </button>
                         <input
                             ref={fileRef}
@@ -117,12 +117,12 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
                 </div>
 
                 {/* fields */}
-                <div className="lg:col-span-8 space-y-6 ">
+                <div className="lg:col-span-8 space-y-6">
                     {/* username + name */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                                Username
+                                Username *
                             </label>
                             <div className="relative">
                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-violet-400 font-bold">@</span>
@@ -139,7 +139,7 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
 
                         <div className="space-y-2">
                             <label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                                Full Name
+                                Full Name *
                             </label>
                             <div className="relative">
                                 <Input
@@ -158,16 +158,18 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
                         <label className="text-xs font-bold uppercase tracking-widest text-gray-500">
                             Short Bio
                         </label>
-                        <textarea
-                            value={formData.bio}
-                            onChange={(e) => setFormData((p) => ({ ...p, bio: e.target.value.slice(0, 160) }))}
-                            placeholder="Tell us a little about your journey..."
-                            rows={4}
-                            className="w-full px-4 py-4 rounded-xl bg-[#0d0e11] border-none text-white placeholder:text-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-violet-500/20"
-                        />
+                        <div className="relative">
+                            <textarea
+                                value={formData.bio}
+                                onChange={(e) => setFormData((p) => ({ ...p, bio: e.target.value.slice(0, 130) }))}
+                                placeholder="Tell us a little about your journey..."
+                                rows={4}
+                                className="w-full px-4 py-4 rounded-xl bg-[#0d0e11] border-none text-white placeholder:text-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+                            />
+                        </div>
                         <div className="flex justify-between text-[10px] text-gray-600">
-                            <span>Recommended: 160 characters</span>
-                            <span>{formData.bio.length}/160</span>
+                            <span>Recommended: 130 characters</span>
+                            <span>{formData.bio.length}/130</span>
                         </div>
                     </div>
 
