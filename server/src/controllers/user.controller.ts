@@ -55,3 +55,30 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
         return res.status(500).json({ message: "Failed to update profile" });
     }
 }
+
+export const checkUsername = async (req: AuthRequest, res: Response) => {
+    const { username } = req.body;
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+    try {
+        if (username) {
+            const existingUser = await prisma.user.findFirst({
+                where: {
+                    username,
+                    NOT: { id: userId },
+                },
+
+            });
+
+            if (existingUser) {
+                throw new Error("Username already taken");
+            }
+        };
+        res.status(200).json({ available: true });
+    } catch (err: any) {
+        res.status(409).json({ available: false });
+    }
+
+
+}

@@ -25,7 +25,7 @@ const STEPS: readonly string[] = ["Welcome", "Account Setup", "Terms", "Get Star
 const stepIcons = { "Welcome": Sparkles, "Account Setup": User, "Terms": FileText, "Get Started": Sparkles };
 
 const Onboarding = () => {
-    const { completeOnboarding } = useUserStore();
+    const { completeOnboarding, checkUsername } = useUserStore();
     const navigate = useNavigate();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -161,6 +161,7 @@ const Onboarding = () => {
                         <AccountSetupStep
                             formData={formData}
                             setFormData={setFormData}
+                            usernameValidation={checkUsername}
                             onNext={handleNext}
                             onBack={handleBack}
                         />

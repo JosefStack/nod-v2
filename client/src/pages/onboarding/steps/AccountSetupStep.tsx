@@ -1,8 +1,9 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { SquarePen, SquareRadical } from "lucide-react";
+import { SquarePen } from "lucide-react";
+
 
 interface FormData {
     username: string;
@@ -15,13 +16,42 @@ interface FormData {
 interface Props {
     formData: FormData;
     setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+    usernameValidation: (data: { username: string }) => Promise<void>;
     onNext: () => void;
     onBack: () => void;
 }
 
-const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
+const AccountSetupStep = ({ formData, setFormData, usernameValidation, onNext, onBack }: Props) => {
     const fileRef = useRef<HTMLInputElement>(null);
     const [errors, setErrors] = useState({ username: "", fullName: "" });
+
+    const [usernameStatus, setUsernameStatus] = useState<"available" | "taken" | "checking" | "idle">("available")
+
+    useEffect(() => {
+        const isValid = formData.username &&
+            formData.username.length >= 4 &&
+            /^[a-zA-Z0-9_]+$/.test(formData.username) &&
+            /[a-zA-Z]/.test(formData.username) &&
+            formData.username.length <= 10
+
+        if (!isValid) {
+            setUsernameStatus("idle")
+            return;
+        }
+
+        setUsernameStatus("checking");
+        const handler = setTimeout(async () => {
+            try {
+                await usernameValidation({ username: formData.username });
+                setUsernameStatus("available")
+            } catch (err: any) {
+                setUsernameStatus("taken")
+            }
+        }, 500);
+
+        return () => clearTimeout(handler);
+
+    }, [formData.username, usernameValidation])
 
     const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -39,13 +69,14 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
                 avatarPreview: base64Img as string,
             }));
         }
-
-
     };
+
+
 
     const validate = () => {
         const newErrors = { username: "", fullName: "" };
         let valid = true;
+
 
         if (!formData.username) {
             newErrors.username = "Username is required";
@@ -78,7 +109,7 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
     };
 
     const handleNext = () => {
-        if (validate()) onNext();
+        if (validate() && usernameStatus === "available") onNext();
     };
 
     return (
@@ -148,7 +179,19 @@ const AccountSetupStep = ({ formData, setFormData, onNext, onBack }: Props) => {
                             </div>
                             {/* {errors.username && <p className="text-red-500 text-xs">{errors.username}</p>} */}
                             {/* above one changes layout shifts cs p doesnt always exist */}
-                            <p className="text-red-500 text-xs w-60">{errors.username}</p>
+                            <p className={`text-xs w-60
+                                    ${errors.username || usernameStatus === "taken" ? "text-red-500" : ""}
+                                    ${usernameStatus === "checking" ? "text-gray-500" : ""}
+                                    ${usernameStatus === "available" ? "text-green-500" : ""}
+                                `}>
+                                    {
+                                        errors.username ? 
+                                        errors.username
+                                        : usernameStatus === "checking" ? "Checking availability"
+                                        : usernameStatus === "available" ? "Username is available"
+                                        : usernameStatus === "taken" ? "Username is taken" : ""
+                                    }
+                            </p>
                         </div>
 
 
