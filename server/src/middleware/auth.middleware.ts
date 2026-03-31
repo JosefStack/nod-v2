@@ -27,9 +27,11 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
                     where: { id: session.user.id },
                     select: { id: true, email: true, isOnboarded: true, username: true, avatar: true, bio: true, image: true, name: true },
                 });
+
+                if (!user) return res.status(401).json({ message: "Unauthorized - User not found" })
                 req.user = user;
             }
-            
+                        
             next();
             return;
         }
