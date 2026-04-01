@@ -29,6 +29,16 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  directChatParticipants DirectChatParticipants[]
+  ownedGroups Group[] @relation("Group Owner")
+  memberOfGroups GroupMember[]
+  ownedRooms Room[] @relation("Room Owner")
+  memberOfRooms RoomMember[]
+  sentMessages Message[]
+  readMessages MessageRead[]
+  sentConnectionRequests Connections[] @relation("ConnectionSender")
+  receivedConnectionRequests Connections[] @relation("ConnectionReceiver")
+
   @@map("users")
 }
 
@@ -78,4 +88,179 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model DirectChat {
+  id String @id @default(uuid())
+  participants DirectChatParticipants[]
+  messages Message[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("direct_chats")
+}
+
+model DirectChatParticipants {
+  id String @id @default(uuid())
+  
+  chatId String
+  chat DirectChat @relation(fields: [chatId], references: [id])
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  
+  lastReadAt DateTime?
+  
+  @@unique([chatId, userId])
+  @@map("direct_chat_participants")
+}
+
+model Group {
+  id String @id @default(uuid())
+  name String
+  description String?
+  avatar String?
+  
+  ownerId String
+  owner User @relation("Group Owner", fields: [ownerId], references: [id])
+
+  members GroupMember[]
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("groups")
+}
+
+model GroupMember {
+  id String @id @default(uuid())
+
+  groupId String
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  role String @default("member")
+
+  joinedAt DateTime @default(now())
+
+  @@unique([groupId, userId])
+  @@map("group_members")
+}
+
+model Room {
+  id String @id @default(uuid())
+  name String
+  description String?
+  avatar String?
+
+  isPrivate Boolean @default(false)
+  password String?
+
+  capacity Int @default(20)
+  region String @default("Random")
+
+  ownerId String
+  owner User @relation("Room Owner", fields: [ownerId], references: [id])
+  
+  members RoomMember[]
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("rooms")
+}
+
+model RoomMember {
+  id String @id @default(uuid())
+  
+  roomId String
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  joinedAt DateTime @default(now())
+
+  @@map("room_members")
+}
+
+model Message {
+  id String @id @default(uuid())
+
+  content String?
+
+  senderId String
+  sender User @relation(fields: [senderId], references: [id])
+
+  directChatId String?
+  directChat DirectChat? @relation(fields: [directChatId], references: [id])
+
+  groupId String?
+  group Group? @relation(fields: [groupId], references: [id])
+
+  roomId String?
+  room Room? @relation(fields: [roomId], references: [id])
+
+  attachments Attachment[]
+
+  readBy MessageRead[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("messages")
+}
+
+model Attachment {
+  id String @id @default(uuid())
+  
+  messageId String
+  message Message @relation(fields: [messageId], references: [id])
+
+  url String
+  type String
+  fileName String?
+  size Int?
+  width Int?
+  height Int?
+  duration Int?
+
+  createdAt DateTime @default(now())
+
+  @@map("attachments")
+}
+
+
+model MessageRead {
+  id String @id @default(uuid())
+
+  messageId String
+  message Message @relation(fields: [messageId], references: [id])
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  readAt DateTime @default(now())
+
+  @@unique([userId, messageId])
+  @@map("message_reads")
+}
+
+model Connections {
+  id String @id @default(uuid())
+
+  senderId String
+  sender User @relation("ConnectionSender", fields: [senderId], references: [id])
+  receiverId String
+  receiver User @relation("ConnectionReceiver", fields: [receiverId], references: [id])
+
+  status String @default("pending")
+
+  createdAt DateTime @default(now())
+
+  @@unique([senderId, receiverId])
+  @@map("connections")
 }
