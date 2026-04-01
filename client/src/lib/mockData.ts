@@ -1,0 +1,81 @@
+export const mockChats = [
+    {
+        id: "1",
+        name: "Sarah.Design",
+        avatar: null,
+        lastMessage: "I've attached the new brand anch...",
+        time: "2m",
+        unread: 1,
+        online: true,
+        type: "direct",
+    },
+    {
+        id: "2",
+        name: "Alex_Dev",
+        avatar: null,
+        lastMessage: "The Tailwind config is ready for re...",
+        time: "1h",
+        unread: 0,
+        online: false,
+        type: "direct",
+    },
+    {
+        id: "3",
+        name: "Marketing Sync",
+        avatar: null,
+        lastMessage: "@Sarah check the latest deck.",
+        time: "3h",
+        unread: 0,
+        online: false,
+        type: "group",
+    },
+];
+
+export const mockMessages = [
+    {
+        id: "1",
+        content: "Hey! Just finished the initial draft for the Nod branding. I think the tonal recess approach really helps the primary accents pop.",
+        senderId: "other",
+        senderName: "Sarah.Design",
+        senderAvatar: null,
+        time: "10:42 AM",
+        image: null,
+        dateLabel: "TODAY, MARCH 30",
+    },
+    {
+        id: "2",
+        content: "Let me know what you think about the gradient usage on the main CTA.",
+        senderId: "other",
+        senderName: "Sarah.Design",
+        senderAvatar: null,
+        time: "10:43 AM",
+        image: null,
+        dateLabel: null,
+    },
+    {
+        id: "3",
+        content: "These looks incredible. The contrast ratio is perfect for high-focus work sessions.",
+        senderId: "me",
+        senderName: "You",
+        senderAvatar: null,
+        time: "10:45 AM",
+        image: null,
+        dateLabel: null,
+    },
+    {
+        id: "4",
+        content: "The tertiary glow under the active nav tab is a really nice touch. It feels alive.",
+        senderId: "me",
+        senderName: "You",
+        senderAvatar: null,
+        time: "10:45 AM",
+        image: null,
+        dateLabel: null,
+    },
+];
+
+export const mockRooms = [
+    { id: "1", name: "Neon Lounge", avatar: null, online: 42, capacity: 100, region: "Random" },
+    { id: "2", name: "Pixel Pirates", avatar: null, online: 15, capacity: 50, region: "Random" },
+    { id: "3", name: "Dev Talk", avatar: null, online: 89, capacity: 200, region: "North America" },
+];
