@@ -74,7 +74,7 @@ const login = async (req: Request, res: Response) => {
 
         if (!input || !password) return res.status(400).json({ message: "All fields required" });
 
-        const isEmail = input.includes("@");
+        const isEmail = input.includes("@");    
 
         const user = await prisma.user.findFirst({
             where: { [isEmail ? "email" : "username"] : input },
