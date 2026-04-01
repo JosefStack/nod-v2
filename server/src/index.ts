@@ -7,6 +7,9 @@ import authRouter from "./routes/authRoutes.ts";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.ts";
 import userRouter from "./routes/userRoutes.ts";
+import chatRouter from "./routes/chatRoutes.ts";
+import messageRouter from "./routes/messageRoutes.ts";
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,8 +26,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use('/api/auth', authRouter);
-
 app.use('/api/user', userRouter);
+app.use('/api/chat', chatRouter);
+app.use('/api/message', messageRouter);
+
 
 app.all('/api/auth/{*any}', toNodeHandler(auth));
 
