@@ -2,7 +2,7 @@ import { prisma } from "../../lib/prisma.ts";
 import { AuthRequest } from "../../middleware/auth.middleware.ts";
 import { Response } from "express";
 
-
+// to be implemented
 const getAllRoomChats = (req: AuthRequest, res: Response) => {
     try {
 
