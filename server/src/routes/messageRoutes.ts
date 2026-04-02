@@ -7,9 +7,9 @@ import { getAllMessages, sendMessage, deleteMessage } from "../controllers/messa
 
 const messageRouter = Router();
 
-messageRouter.get("/:id", getAllMessages);
+messageRouter.get("/:chatId", getAllMessages);
 messageRouter.post("/send", sendMessage);
-messageRouter.delete("/delte", deleteMessage);
+messageRouter.delete("/:messageId", deleteMessage);
 
 
 
