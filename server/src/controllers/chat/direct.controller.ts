@@ -1,12 +1,10 @@
 import { prisma } from "../../lib/prisma.ts";
-import { AuthRequest } from "../../middleware/auth.middleware.ts";
-import { Response } from "express";
 
-const getAllDirectChats = async (req: AuthRequest, res: Response) => {
+
+const getAllDirectChats = async (id: String) => {
 
     try {
-        const userId = req.user?.id;
-        if (!userId) return res.status(401).json({ message: "Unauthorized" });
+        const userId = id;
 
         const directChats = await prisma.directChat.findMany({
             where: {
@@ -39,7 +37,7 @@ const getAllDirectChats = async (req: AuthRequest, res: Response) => {
                             select: {
                                 id: true,
                                 username: true,
-                                avatar: true,
+                                name: true,
                             }
                         },
                         attachments: {
@@ -47,11 +45,67 @@ const getAllDirectChats = async (req: AuthRequest, res: Response) => {
                                 type: true,
                             }
                         }
-
+                    },
+                },
+                _count: {
+                    select: {
+                        messages: {
+                            where: {
+                                NOT: { senderId: userId },
+                                readBy: {
+                                    none: { userId }
+                                }
+                            }
+                        }
                     }
                 }
             }
         });
+
+
+
+        const formattedDirectChats = directChats.map((chat: any) => {
+
+            const otherParticipant = chat.participants.find((participant: any) => participant.userId !== userId)?.user;
+            const lastMessage = chat.messages[0];
+
+            const attachments = lastMessage.attachments || [];
+
+            let preview = lastMessage.content;
+
+            if (!preview && attachments.length > 0) {
+                const hasImage = attachments.some((attachment: any) => attachment.type === "image")
+                const hasVideo = attachments.some((attachment: any) => attachment.type === "video")
+
+                if (hasImage && hasVideo) {
+                    preview = `🔗${attachments.length} attachments`
+                } else if (hasImage) {
+                    preview = `📸${attachments.length} image${attachments.length > 1 ? 's' : ''}`
+                } else if (hasVideo) {
+                    preview = `🎬${attachments.length} video${attachments.length > 1 ? 's' : ''}`
+                } else {
+                    preview = `🔗${attachments.length} attachment${attachments.length > 1 ? 's' : ''}`
+                }
+            }
+
+            return {
+                id: chat.id,
+                type: "direct",
+                name: otherParticipant.name,
+                username: otherParticipant.username,
+                avatar: otherParticipant.avatar,
+                lastMessage: {
+                    preview,
+                    createdAt: lastMessage.createdAt,
+                    updatedAt: lastMessage.updatedAt,
+                    sender: lastMessage.sender.username,
+                },
+                unreadCount: chat._count.messages,
+            }
+        });
+
+
+        return formattedDirectChats;
     } catch (err: any) {
         throw new Error(err.message || "Failed to fetch direct chats")
     }
