@@ -97,7 +97,7 @@ model DirectChat {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("direct_chats")
+  @@map("direct_chats") 
 }
 
 model DirectChatParticipants {
@@ -108,7 +108,7 @@ model DirectChatParticipants {
   userId String
   user User @relation(fields: [userId], references: [id])
   
-  lastReadAt DateTime?
+  lastReadAt DateTime?    
   
   @@unique([chatId, userId])
   @@map("direct_chat_participants")
