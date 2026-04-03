@@ -174,11 +174,6 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
 };
 
 
-
-
-
-
-
 export const deleteMessage = async (req: AuthRequest, res: Response) => {
 
     try {

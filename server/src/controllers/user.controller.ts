@@ -89,7 +89,7 @@ export const searchUsers = async (req: AuthRequest, res: Response) => {
         const userId = req.user?.id;
         if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-        const { searchKey } = req.params;
+        const { searchKey } = req.body;
         if (!searchKey || typeof searchKey !== "string") return res.status(400).json({ message: "Search query required" });
         if (searchKey.trim().length < 2) return res.status(400).json({ message: "Search query must have at least 2 characters" });
 
