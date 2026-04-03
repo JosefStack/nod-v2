@@ -9,7 +9,7 @@ import cloudinary from "../lib/cloudinary.ts";
 export const getAllMessages = async (req: AuthRequest, res: Response) => {
 
     try {
-        
+
 
         const userId = req.user?.id;
         if (!userId) return res.status(401).json({ message: "Unauthorized" });
@@ -17,12 +17,13 @@ export const getAllMessages = async (req: AuthRequest, res: Response) => {
         const { chatId } = req.params;
         const { type } = req.query;
 
+
         if (!type) return res.status(400).json({ message: "type query param required" });
 
         const where =
             type === "direct" ? { directChatId: chatId } :
-                type === "group" ? { groupChatId: chatId } :
-                    type === "room" ? { roomChatId: chatId } :
+                type === "group" ? { groupId: chatId } :
+                    type === "room" ? { roomId: chatId } :
                         null;
 
         if (!where) return res.status(400).json({ message: "Invalid chat type" });
@@ -63,7 +64,7 @@ const verifyMembership = async (userId: string, chatId: string, chatType: string
     if (chatType === "group") {
         const participant = await prisma.groupMember.findFirst({
             where: {
-                chatId, userId
+                groupId: chatId, userId
             }
         });
         return !!participant;
@@ -72,25 +73,28 @@ const verifyMembership = async (userId: string, chatId: string, chatType: string
     if (chatType === "room") {
         const participant = await prisma.roomMember.findFirst({
             where: {
-                chatId, userId
+                roomId: chatId, userId
             }
         });
         return !!participant;
     }
+
+    return false;
 };
 
 
 export const sendMessage = async (req: AuthRequest, res: Response) => {
-
     try {
+
+        
 
         const userId = req.user?.id;
         if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-        if (!req.body) return res.status(400).json({ message: "Message cannot be empty" })
+        if (!req.body) return res.status(400).json({ message: "Message cannot be empty" });
 
 
-        const { content, attachments, chatType=null, chatId=null } = req.body;
+        const { content, attachments, chatType, chatId } = req.body;
 
         if ((!content || !content.trim()) && (!attachments || attachments.length === 0)) {
             return res.status(400).json({ message: "Message cannot be empty" });
@@ -98,6 +102,10 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
 
         if (!chatId || !chatType) {
             return res.status(400).json({ message: "chatId and chatType is are requried" });
+        }
+        
+        if (!["group", "room", "direct"].includes(chatType)) {
+            return res.status(400).json({ message: "Invalid chat type" })
         }
 
         // check if sender (user) is a member of the provided chat
@@ -155,7 +163,7 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
             }
         });
 
-        return res.json(201).json(message);
+        return res.status(201).json(message);
 
 
     } catch (err: any) {
