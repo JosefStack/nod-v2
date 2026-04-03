@@ -62,5 +62,11 @@ interface ChatStore {
     fetchChats: () => Promise<void>;
     fetchMessages: (chatId: string, type: string) => Promise<void>;
     sendMessage: (data: { chatId: string, chatType: string, content: string, attachments?: any[] }) => Promise<void>;
-    createDirectChat: () => Promise<void>;
+    createDirectChat: (targetUserId: string) => Promise<Chat | null>;
+    createGroup: (groupName: string, memberIds: string[], groupDescription?: string, groupAvatar?: string) => Promise<void>;
+    searchUsers: (searchKey: string) => Promise<void>;
+
+    setActiveChat: (chat: Chat | null) => void;
+    clearMessages: () => void;
 }
+
