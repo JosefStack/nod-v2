@@ -130,11 +130,11 @@ export const getOrCreateDirectChat = async (req: AuthRequest, res: Response) => 
         if (!targetUser) return res.status(404).json({ message: "User not found" });
 
         // check for existing direct chats
-        const existingDirectChat = await prisma.directChat.findUnique({
+        const existingDirectChat = await prisma.directChat.findFirst({
             where: {
                 AND: [
                     { participants: { some: { userId } } },
-                    { participatns: { some: { userId: targetUserId } } }
+                    { participants: { some: { userId: targetUserId } } }
                 ]
             }
         });
