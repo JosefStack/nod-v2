@@ -58,15 +58,50 @@ interface ChatStore {
     isSendingMessage: boolean;
     searchResults: User[];
     isSearching: boolean;
-    
+
     fetchChats: () => Promise<void>;
-    fetchMessages: (chatId: string, type: string) => Promise<void>;
+    fetchMessages: (chatId: string, chatType: string) => Promise<void>;
     sendMessage: (data: { chatId: string, chatType: string, content: string, attachments?: any[] }) => Promise<void>;
-    createDirectChat: (targetUserId: string) => Promise<Chat | null>;
-    createGroup: (groupName: string, memberIds: string[], groupDescription?: string, groupAvatar?: string) => Promise<void>;
+    createDirectChat: (targetUserId: string) => Promise<void>;
+    createGroup: (date: { groupName: string, memberIds: string[], groupDescription?: string, groupAvatar?: string }) => Promise<void>;
     searchUsers: (searchKey: string) => Promise<void>;
 
     setActiveChat: (chat: Chat | null) => void;
     clearMessages: () => void;
 }
 
+
+export const useChatStore = create<ChatStore>((set, get) => ({
+
+    // initial state
+    chats: [],
+    activeChat: null,
+    isLoadingChats: false,
+
+    messages: [],
+    isLoadingMessages: false,
+
+    isSendingMessage: false,
+
+    searchResults: [],
+    isSearching: false,
+
+    // functions
+
+    fetchChats: async () => {},
+
+    fetchMessages: async (chatId, chatType) => { },
+
+    sendMessage: async (data) => { },
+
+    createDirectChat: async (targetUserId) => { },
+
+    createGroup: async (data) => { },
+
+    searchUsers: async (searchKey) => { },
+
+    setActiveChat: (chat) => { set({ chats: [] }) },
+
+    clearMessages: () => { set({ messages: [] }) },
+
+}))
