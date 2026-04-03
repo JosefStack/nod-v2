@@ -63,10 +63,10 @@ interface ChatStore {
     fetchMessages: (chatId: string, chatType: string) => Promise<void>;
     sendMessage: (data: { chatId: string, chatType: string, content: string, attachments?: any[] }) => Promise<void>;
     createDirectChat: (targetUserId: string) => Promise<void>;
-    createGroup: (date: { groupName: string, memberIds: string[], groupDescription?: string, groupAvatar?: string }) => Promise<void>;
+    createGroup: (data: { groupName: string, memberIds: string[], groupDescription?: string, groupAvatar?: string }) => Promise<void>;
     searchUsers: (searchKey: string) => Promise<void>;
 
-    setActiveChat: (chat: Chat | null) => void;
+    setActiveChat: (chat: Chat | null) => Promise<void>;
     clearMessages: () => void;
 }
 
@@ -118,8 +118,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         set({ isSendingMessage: true });
         try {
             const response = await axiosInstance.post("/message/send", data);
-            set({ messages: [...get().messages, response.data] });
-
+            set((state) => ({
+                messages: [...state.messages, response.data]
+            }))
             await get().fetchChats();
         } catch (err: any) {
             console.error("Failed to send message: ", err.message);
@@ -135,7 +136,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             const newChat = response.data;
 
             set((state) => ({
-                chats: [newChat, ...state.chats.filter(chat => chat.id !== newChat.id)];
+                chats: [newChat, ...state.chats.filter(chat => chat.id !== newChat.id)]
             }));
         } catch (err: any) {
             console.error("Failed to create/retrieve direct chat: ", err);
@@ -150,7 +151,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             set((state) => ({
                 chats: [newGroup, ...state.chats]
             }))
-            // why cant i do set({ chats: [newGroup, get().chats] })
+            // why cant i do set({ chats: [newGroup, get().chats] }) => its slightly slower cs i got to lookup the previoud state using get()s
         } catch (err: any) {
             console.error("Failed to create group chat: ", err);
             throw new Error(err.response?.data || err.message || "Failed to create group chat");
@@ -162,7 +163,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             set({ searchResults: [] });
             return;
         };
-        
+
         set({ isSearching: true });
         try {
             const response = await axiosInstance.post("/user/search", { searchKey });
@@ -175,7 +176,12 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         }
     },
 
-    setActiveChat: (chat) => { set({ chats: [] }) },
+    setActiveChat: async (chat) => { 
+        set({ activeChat: chat });
+        if ( chat ) {
+            await get().fetchMessages(chat.id, chat.type);
+        }
+    },
 
     clearMessages: () => { set({ messages: [] }) },
 
