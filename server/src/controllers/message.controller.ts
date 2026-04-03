@@ -49,7 +49,7 @@ export const getAllMessages = async (req: AuthRequest, res: Response) => {
     }
 }
 
-const verifyMembership = async (userId: string, chatId: string, chatType: string) {
+const verifyMembership = async (userId: string, chatId: string, chatType: string) => {
     if (chatType === "direct") {
         const participant = await prisma.directChatParticipants.findFirst({
             where: {
