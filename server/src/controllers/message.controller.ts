@@ -103,7 +103,7 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
         let uplaodedAttachments: any[] = [];
         if (attachments && attachments.length > 0) {
             const upload = await Promise.all(
-                attachments.map((attachment: { data: string, type: string, fileName?: string, size?: number }) => {
+                attachments.map(async (attachment: { data: string, type: string, fileName?: string, size?: number }) => {
                     const result = await cloudinary.uploader.upload(attachment.data, {
                         folder: attachment.type === "video" ? "nod/videos" : attachment.type === "image" ? "nod/images" : "nod/files",
                         resource_type: attachment.type === "video" ? "video" : attachment.type === "image" ? "image" : "raw",
@@ -159,13 +159,39 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
         return res.status(500).json({ message: "Failed to send message" })
     }
 
+};
+
+
+
+
+
+
+
+export const deleteMessage = async (req: AuthRequest, res: Response) => {
+
+    try {
+
+        const userId = req.user?.id;
+        if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+        const { messageId } = req.params;
+        if (!messageId) return res.status(400).json({ message: "messageId is requried" });
+
+        const message = await prisma.message.findFirst({
+            where: { id: messageId }, 
+            select: { senderId: true }
+        });
+
+        if (!message) return res.status(404).json({ message: "Message not found" });
+        if (message.senderId !== userId) return res.status(403).json({ message: "Cannot delete someone else's message" });
+        
+        await prisma.message.delete({ where: { id: messageId } });
+
+        return res.status(200).json({ message: "Message deleted" });
+
+    } catch (err: any) {
+        console.error("Failed to delete message: ", err);
+        return res.status(500).json({ message: "Failed to delete message" });
+    }
 
 }
-
-
-
-
-
-
-
-export const deleteMessage = (req: AuthRequest, res: Response) => { }
