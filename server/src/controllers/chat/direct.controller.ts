@@ -1,7 +1,9 @@
+import { Response } from "express";
 import { prisma } from "../../lib/prisma.ts";
+import { AuthRequest } from "../../middleware/auth.middleware.ts";
 
 
-const getAllDirectChats = async (id: String) => {
+export const getAllDirectChats = async (id: string) => {
 
     try {
         const userId = id;
@@ -111,4 +113,66 @@ const getAllDirectChats = async (id: String) => {
     }
 };
 
-export default getAllDirectChats;
+export const getOrCreateDirectChat = async (req: AuthRequest, res: Response) => {
+
+    try {
+        const userId = req.user?.id;
+        if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+        const { targetUserId } = req.body;
+        if (!targetUserId) return res.status(404).json({ message: "User not found" });
+        if (targetUserId === userId) return res.status(400).json({ message: "Cannot chat with yourself" })
+
+        const targetUser = await prisma.user.findUnique({
+            where: { id: targetUserId },
+            select: { id: true, username: true, name: true, avatar: true }
+        });
+        if (!targetUser) return res.status(404).json({ message: "User not found" });
+
+        // check for existing direct chats
+        const existingDirectChat = await prisma.directChat.findUnique({
+            where: {
+                AND: [
+                    { participants: { some: { userId } } },
+                    { participatns: { some: { userId: targetUserId } } }
+                ]
+            }
+        });
+        
+        if (existingDirectChat) {
+            return res.status(200).json({
+                id: existingDirectChat.id,
+                type: "direct",
+                isNew: false,
+                other: targetUser,
+            });
+        };
+
+        const newChat = await prisma.directChat.create({
+            data: {
+                participants: {
+                    create: [
+                        { userId }, 
+                        { userId: targetUserId }
+                    ]
+                }
+            }
+        });
+
+        return res.status(201).json({
+            id: newChat.id,
+            type: "direct",
+            isNew: true,
+            other: targetUser,
+        })
+
+
+
+    } catch (err: any) {
+        console.error(err || "error creating chat or fetching existing chat")
+        return res.status(500).json({ message: "Failed to create direct chat" })
+    } 
+
+
+}
+

@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma.ts";
 import { AuthRequest } from "../middleware/auth.middleware.ts";
-import getAllDirectChats from "./chat/direct.controller.ts";
+import { getAllDirectChats } from "./chat/direct.controller.ts";
 import getAllGroupChats from "./chat/group.controller.ts";
+
 
 
 export const getAllChats = async (req: AuthRequest, res: Response) => {
