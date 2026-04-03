@@ -11,6 +11,6 @@ userRouter.use(protect);
 userRouter.patch("/update-profile", updateProfile);
 userRouter.post("/check-username", checkUsername);
 
-userRouter.get("/search", searchUsers);
+userRouter.post("/search", searchUsers);
 
 export default userRouter;
