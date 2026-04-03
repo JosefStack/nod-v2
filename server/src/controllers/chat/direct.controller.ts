@@ -71,7 +71,7 @@ export const getAllDirectChats = async (id: string) => {
             const otherParticipant = chat.participants.find((participant: any) => participant.userId !== userId)?.user;
             const lastMessage = chat.messages[0] || null;
 
-            const attachments = lastMessage.attachments || [];
+            const attachments = lastMessage?.attachments || [];
 
             let preview = lastMessage?.content || null;
 
@@ -98,9 +98,9 @@ export const getAllDirectChats = async (id: string) => {
                 avatar: otherParticipant.avatar,
                 lastMessage: {
                     preview,
-                    createdAt: lastMessage.createdAt,
-                    updatedAt: lastMessage.updatedAt,
-                    sender: lastMessage.sender.username,
+                    createdAt: lastMessage?.createdAt,
+                    updatedAt: lastMessage?.updatedAt,
+                    sender: lastMessage?.sender.username,
                 },
                 unreadCount: chat._count.messages,
             }
