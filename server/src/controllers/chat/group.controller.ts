@@ -53,11 +53,11 @@ const getAllGroupChats = async (id: String) => {
 
         const formattedGroupChats = groupChats.map((chat: any) => {
 
-            const lastMessage = chat.messages[0];
+            const lastMessage = chat.messages[0] || null;
 
             const attachments = lastMessage.attachments || [];
 
-            let preview = lastMessage.content;
+            let preview = lastMessage?.content || null;
 
             if (!preview && attachments.length > 0) {
                 const hasImage = attachments.some((attachment: any) => attachment.type === "image")
