@@ -238,7 +238,7 @@ model MessageRead {
   id String @id @default(uuid())
 
   messageId String
-  message Message @relation(fields: [messageId], references: [id])
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   userId String
   user User @relation(fields: [userId], references: [id])

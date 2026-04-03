@@ -3,7 +3,7 @@ import { prisma } from "../../lib/prisma.ts";
 import { AuthRequest } from "../../middleware/auth.middleware.ts";
 import cloudinary from "../../lib/cloudinary.ts";
 
-export const getAllGroupChats = async (id: String) => {
+export const getAllGroupChats = async (id: string) => {
     try {
         const userId = id;
 
@@ -12,7 +12,7 @@ export const getAllGroupChats = async (id: String) => {
                 members: {
                     some: { userId }
                 }
-            }, 
+            },
             select: {
                 id: true,
                 name: true,
@@ -30,7 +30,7 @@ export const getAllGroupChats = async (id: String) => {
                                 username: true,
                                 name: true,
                             }
-                        }, 
+                        },
                         attachments: {
                             select: {
                                 type: true,
@@ -42,7 +42,7 @@ export const getAllGroupChats = async (id: String) => {
                     select: {
                         messages: {
                             where: {
-                                NOT: {senderId : userId},
+                                NOT: { senderId: userId },
                                 readBy: {
                                     none: { userId }
                                 }
@@ -58,11 +58,11 @@ export const getAllGroupChats = async (id: String) => {
 
             const lastMessage = chat.messages[0] || null;
 
-            const attachments = lastMessage.attachments || [];
+            const attachments = lastMessage?.attachments || [];
 
             let preview = lastMessage?.content || null;
 
-            if (!preview && attachments.length > 0) {
+            if (!preview && attachments?.length > 0) {
                 const hasImage = attachments.some((attachment: any) => attachment.type === "image")
                 const hasVideo = attachments.some((attachment: any) => attachment.type === "video")
 
@@ -75,7 +75,7 @@ export const getAllGroupChats = async (id: String) => {
                 } else {
                     preview = `🔗${attachments.length} attachment${attachments.length > 1 ? 's' : ''}`
                 }
-            }
+            };
 
             return {
                 id: chat.id,
@@ -84,9 +84,9 @@ export const getAllGroupChats = async (id: String) => {
                 avatar: chat.avatar,
                 lastMessage: {
                     preview,
-                    createdAt: lastMessage.createdAt,
-                    updatedAt: lastMessage.updatedAt,
-                    sender: lastMessage.sender.username
+                    createdAt: lastMessage?.createdAt,
+                    updatedAt: lastMessage?.updatedAt,
+                    sender: lastMessage?.sender.username
                 },
                 unreadCount: chat._count.messages,
             }
@@ -102,17 +102,17 @@ export const createGroup = async (req: AuthRequest, res: Response) => {
     try {
 
         const userId = req.user?.id;
-        if (!userId) return res.status(401).json({message: "Unauthorized"});
+        if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
         const { groupName, groupAvatar, groupDescription, memberIds } = req.body;
 
-        if (!groupName.trim()) return res.status(400).json({ message: "Group name is required" });
+        if (!groupName || !groupName.trim()) return res.status(400).json({ message: "Group name is required" });
         if (!memberIds || memberIds.length === 0) return res.status(400).json({ message: "Add at least one member" });
 
         let groupAvatarUrl: string | null = null;
         if (groupAvatar) {
             const result = await cloudinary.uploader.upload(groupAvatar, {
-                fodler: "nod/groups",
+                folder: "nod/groups",
                 transformation: [{ width: 200, height: 200, crop: "fill" }],
             });
             groupAvatarUrl = result.secure_url;
@@ -131,15 +131,17 @@ export const createGroup = async (req: AuthRequest, res: Response) => {
         const allMemberIds = [... new Set([...validIds, userId])];
 
         const newGroup = await prisma.group.create({
-            name: groupName, 
-            avatar: groupAvatar,
-            description: groupDescription || null,
-            ownerid: userId,
-            members: {
-                create: allMemberIds.map((id: string) => ({
-                    userId: id,
-                    role: id === userId ? "owner" : "member"
-                }))
+            data: {
+                name: groupName,
+                avatar: groupAvatarUrl,
+                description: groupDescription || null,
+                ownerId: userId,
+                members: {
+                    create: allMemberIds.map((id: string) => ({
+                        userId: id,
+                        role: id === userId ? "owner" : "member"
+                    }))
+                },
             },
             include: {
                 members: {
@@ -169,4 +171,4 @@ export const createGroup = async (req: AuthRequest, res: Response) => {
         console.error("Failed to create group: ", err);
         return res.status(500).json({ message: "Failed to create group" })
     }
-}
+};
