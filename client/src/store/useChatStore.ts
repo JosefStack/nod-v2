@@ -88,20 +88,95 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
     // functions
 
-    fetchChats: async () => {},
+    fetchChats: async () => {
+        set({ isLoadingChats: true });
+        try {
+            const response = await axiosInstance.get("/chat");
+            set({ chats: response.data });
+        } catch (err: any) {
+            console.error("Failed to fetch chats: ", err.message);
+            throw new Error(err.response?.data || err.message || "Failed to fetch chats");
+        } finally {
+            set({ isLoadingChats: false });
+        }
+    },
 
-    fetchMessages: async (chatId, chatType) => { },
+    fetchMessages: async (chatId, chatType) => {
+        set({ isLoadingMessages: true });
+        try {
+            const response = await axiosInstance.get(`/message/${chatId}?type=${chatType}`);
+            set({ messages: response.data });
+        } catch (err: any) {
+            console.error("Failed to load messages: ", err.message);
+            throw new Error(err.response?.data || err.message || "Failed to load messages");
+        } finally {
+            set({ isLoadingMessages: false });
+        }
+    },
 
-    sendMessage: async (data) => { },
+    sendMessage: async (data) => {
+        set({ isSendingMessage: true });
+        try {
+            const response = await axiosInstance.post("/message/send", data);
+            set({ messages: [...get().messages, response.data] });
 
-    createDirectChat: async (targetUserId) => { },
+            await get().fetchChats();
+        } catch (err: any) {
+            console.error("Failed to send message: ", err.message);
+            throw new Error(err.response?.data || err.message || "Failed to send message");
+        } finally {
+            set({ isSendingMessage: false });
+        }
+    },
 
-    createGroup: async (data) => { },
+    createDirectChat: async (targetUserId) => {
+        try {
+            const response = await axiosInstance.post("/chat/direct", { targetUserId });
+            const newChat = response.data;
 
-    searchUsers: async (searchKey) => { },
+            set((state) => ({
+                chats: [newChat, ...state.chats.filter(chat => chat.id !== newChat.id)];
+            }));
+        } catch (err: any) {
+            console.error("Failed to create/retrieve direct chat: ", err);
+            throw new Error(err.response?.data || err.message || "Failed to create direct chat");
+        }
+    },
+
+    createGroup: async (data) => {
+        try {
+            const response = await axiosInstance.post("/chat/group", data);
+            const newGroup = response.data;
+            set((state) => ({
+                chats: [newGroup, ...state.chats]
+            }))
+            // why cant i do set({ chats: [newGroup, get().chats] })
+        } catch (err: any) {
+            console.error("Failed to create group chat: ", err);
+            throw new Error(err.response?.data || err.message || "Failed to create group chat");
+        }
+    },
+
+    searchUsers: async (searchKey) => {
+        if (!searchKey || searchKey.length < 2) {
+            set({ searchResults: [] });
+            return;
+        };
+        
+        set({ isSearching: true });
+        try {
+            const response = await axiosInstance.post("/user/search", { searchKey });
+            set({ searchResults: response.data });
+        } catch(err: any) {
+            console.error("User search failed: ", err);
+            throw new Error(err.response?.data || err.message || "User search failed");
+        } finally {
+            set({ isSearching: false })
+        }
+    },
 
     setActiveChat: (chat) => { set({ chats: [] }) },
 
     clearMessages: () => { set({ messages: [] }) },
 
-}))
+}));
