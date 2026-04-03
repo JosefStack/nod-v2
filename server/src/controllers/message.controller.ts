@@ -87,9 +87,12 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
         const userId = req.user?.id;
         if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-        const { content, attachments, chatType, chatId } = req.body;
+        if (!req.body) return res.status(400).json({ message: "Message cannot be empty" })
 
-        if (!content.trim() && (!attachments || attachments.length === 0)) {
+
+        const { content, attachments, chatType=null, chatId=null } = req.body;
+
+        if ((!content || !content.trim()) && (!attachments || attachments.length === 0)) {
             return res.status(400).json({ message: "Message cannot be empty" });
         }
 
