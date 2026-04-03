@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma.ts";
 import { AuthRequest } from "../middleware/auth.middleware.ts";
-import getAllDirectChats from "./chat/direct.controller.ts";
-import getAllGroupChats from "./chat/group.controller.ts";
+import { getAllDirectChats } from "./chat/direct.controller.ts";
+import { getAllGroupChats } from "./chat/group.controller.ts";
+
 
 
 export const getAllChats = async (req: AuthRequest, res: Response) => {
@@ -11,8 +12,10 @@ export const getAllChats = async (req: AuthRequest, res: Response) => {
         const userId = req.user?.id;
         if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-        const directChats = await getAllDirectChats(userId);
-        const groupChats = await getAllGroupChats(userId);
+        const [ directChats, groupChats ] = await Promise.all([
+            getAllDirectChats(userId), 
+            getAllGroupChats(userId)
+        ])
 
         const allChats = [...directChats, ...groupChats];
 

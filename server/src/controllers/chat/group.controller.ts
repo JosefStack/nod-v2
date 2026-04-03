@@ -1,6 +1,9 @@
+import { Response } from "express";
 import { prisma } from "../../lib/prisma.ts";
+import { AuthRequest } from "../../middleware/auth.middleware.ts";
+import cloudinary from "../../lib/cloudinary.ts";
 
-const getAllGroupChats = async (id: String) => {
+export const getAllGroupChats = async (id: String) => {
     try {
         const userId = id;
 
@@ -53,11 +56,11 @@ const getAllGroupChats = async (id: String) => {
 
         const formattedGroupChats = groupChats.map((chat: any) => {
 
-            const lastMessage = chat.messages[0];
+            const lastMessage = chat.messages[0] || null;
 
             const attachments = lastMessage.attachments || [];
 
-            let preview = lastMessage.content;
+            let preview = lastMessage?.content || null;
 
             if (!preview && attachments.length > 0) {
                 const hasImage = attachments.some((attachment: any) => attachment.type === "image")
@@ -95,4 +98,75 @@ const getAllGroupChats = async (id: String) => {
     }
 }
 
-export default getAllGroupChats;
+export const createGroup = async (req: AuthRequest, res: Response) => {
+    try {
+
+        const userId = req.user?.id;
+        if (!userId) return res.status(401).json({message: "Unauthorized"});
+
+        const { groupName, groupAvatar, groupDescription, memberIds } = req.body;
+
+        if (!groupName.trim()) return res.status(400).json({ message: "Group name is required" });
+        if (!memberIds || memberIds.length === 0) return res.status(400).json({ message: "Add at least one member" });
+
+        let groupAvatarUrl: string | null = null;
+        if (groupAvatar) {
+            const result = await cloudinary.uploader.upload(groupAvatar, {
+                fodler: "nod/groups",
+                transformation: [{ width: 200, height: 200, crop: "fill" }],
+            });
+            groupAvatarUrl = result.secure_url;
+        };
+
+        // check if added members are valid
+        const validUsers = await prisma.user.findMany({
+            where: {
+                id: { in: memberIds }
+            },
+            select: { id: true },
+        });
+        const validIds = validUsers.map((user: any) => user.id);
+
+        // creator is also a member...
+        const allMemberIds = [... new Set([...validIds, userId])];
+
+        const newGroup = await prisma.group.create({
+            name: groupName, 
+            avatar: groupAvatar,
+            description: groupDescription || null,
+            ownerid: userId,
+            members: {
+                create: allMemberIds.map((id: string) => ({
+                    userId: id,
+                    role: id === userId ? "owner" : "member"
+                }))
+            },
+            include: {
+                members: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true, name: true, username: true, avatar: true,
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        return res.status(201).json({
+            id: newGroup.id,
+            name: newGroup.name,
+            description: newGroup.description || null,
+            avatar: newGroup.avatar,
+            members: newGroup.members.map((member: any) => ({
+                ...member.user,
+                role: member.role,
+            })),
+        });
+
+    } catch (err: any) {
+        console.error("Failed to create group: ", err);
+        return res.status(500).json({ message: "Failed to create group" })
+    }
+}
