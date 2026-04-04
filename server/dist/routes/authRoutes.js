@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { signup, login, logout, checkAuth } from "../controllers/auth.controller.ts";
+import { signup, login, logout, checkAuth } from "../controllers/auth.controller.js";
 import { protect } from "../middleware/auth.middleware.ts";
 // import { AuthRequest } from "../middleware/auth.middleware.ts";
 const authRouter = Router();
