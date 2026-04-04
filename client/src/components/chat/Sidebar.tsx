@@ -45,18 +45,25 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
                             <p className="text-gray-400 text-xs">@{user?.username}</p>
                         </div>
                     </div>
-                    {/* settings and help -- to be implemented */}
+                    {/* settings and help -- to be implemented -- hover-card for showing {in development} progress*/}
                     <div className="flex gap-1">
                         <HoverCard>
-                            <HoverCardTrigger><button className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg transition-colors">
-                                <Settings size={15} />
-                            </button></HoverCardTrigger>
-                            <HoverCardContent>In development</HoverCardContent>
+                            <HoverCardTrigger>
+                                <button className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg transition-colors">
+                                    <Settings size={15} />
+                                </button>
+                            </HoverCardTrigger>
+                            <HoverCardContent side={"bottom"} className="w-40 h-10 flex items-center justify-center bg-[#272727] text-white">In development!</HoverCardContent>
                         </HoverCard>
 
-                        <button className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg transition-colors">
-                            <HelpCircle size={15} />
-                        </button>
+                        <HoverCard>
+                            <HoverCardTrigger>
+                                <button className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg transition-colors">
+                                    <HelpCircle size={15} />
+                                </button>
+                            </HoverCardTrigger>
+                            <HoverCardContent side={"bottom"} className="w-40 h-10 flex items-center justify-center bg-[#282828] text-white">In development!</HoverCardContent>
+                        </HoverCard>
                     </div>
                 </div>
             </div>
@@ -64,11 +71,15 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
 
             {/* tab switch */}
 
+
             {/* search */}
 
             {/* action button -> add user ... create group */}
 
             {/* chats list */}
+            <div className="flex-1 overflow-y-auto">
+                
+            </div>
 
         </div>
 
