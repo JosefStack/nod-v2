@@ -1,7 +1,7 @@
 import ChatWindow from "@/components/chat/ChatWindow";
 import RoomWindow from "@/components/chat/RoomWindow";
 import Sidebar from "@/components/chat/Sidebar";
-import { useAuthStore } from "@/store/useAuthStore"
+// import { useAuthStore } from "@/store/useAuthStore"
 import { useChatStore } from "@/store/useChatStore"
 import type { Chat } from "@/types/chat";
 import { useEffect, useState } from "react";
@@ -11,8 +11,9 @@ type Tab = "chats" | "rooms"
 
 const ChatPage = () => {
 
-    const { user } = useAuthStore();
-    const { fetchChats, setActiveChat, activeChat, messages } = useChatStore();
+    // const { user } = useAuthStore();
+    const { fetchChats, setActiveChat, activeChat,  } = useChatStore();
+    // const { message } = useChatStore();
     const [activeTab, setActiveTab] = useState<Tab>("chats");
     const [isMobileChatOpen, setIsMobileChatOpen] = useState<boolean>(false);
 
@@ -25,10 +26,10 @@ const ChatPage = () => {
         setIsMobileChatOpen(true);
     };
 
-    const handleBack = () => {
-        setActiveChat(null);
-        setIsMobileChatOpen(false);
-    }
+    // const handleBack = () => {
+    //     setActiveChat(null);
+    //     setIsMobileChatOpen(false);
+    // }
 
 
 
