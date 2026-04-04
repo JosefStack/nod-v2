@@ -1,5 +1,5 @@
-import { prisma } from "../lib/prisma.ts";
-import cloudinary from "../lib/cloudinary.ts";
+import { prisma } from "../lib/prisma.js";
+import cloudinary from "../lib/cloudinary.js";
 export const updateProfile = async (req, res) => {
     try {
         const { username = null, avatar = null, bio = null, fullName = null } = req.body;
