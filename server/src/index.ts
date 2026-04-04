@@ -32,7 +32,9 @@ app.use('/api/user', userRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/message', messageRouter);
 
-
+app.get("/", (req, res) => {
+    res.json({ status: "ok", env: process.env.NODE_ENV });
+});
 
 
 
