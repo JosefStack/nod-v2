@@ -1,12 +1,8 @@
-import { Response } from "express";
-import { prisma } from "../../lib/prisma.js";
-import { AuthRequest } from "../../middleware/auth.middleware.js";
-import cloudinary from "../../lib/cloudinary.js";
-
-export const getAllGroupChats = async (id: string) => {
+import { prisma } from "../../lib/prisma.ts";
+import cloudinary from "../../lib/cloudinary.ts";
+export const getAllGroupChats = async (id) => {
     try {
         const userId = id;
-
         const groupChats = await prisma.group.findMany({
             where: {
                 members: {
@@ -52,31 +48,27 @@ export const getAllGroupChats = async (id: string) => {
                 }
             }
         });
-
-
-        const formattedGroupChats = groupChats.map((chat: any) => {
-
+        const formattedGroupChats = groupChats.map((chat) => {
             const lastMessage = chat.messages[0] || null;
-
             const attachments = lastMessage?.attachments || [];
-
             let preview = lastMessage?.content || null;
-
             if (!preview && attachments?.length > 0) {
-                const hasImage = attachments.some((attachment: any) => attachment.type === "image")
-                const hasVideo = attachments.some((attachment: any) => attachment.type === "video")
-
+                const hasImage = attachments.some((attachment) => attachment.type === "image");
+                const hasVideo = attachments.some((attachment) => attachment.type === "video");
                 if (hasImage && hasVideo) {
-                    preview = `🔗${attachments.length} attachments`
-                } else if (hasImage) {
-                    preview = `📸${attachments.length} image${attachments.length > 1 ? 's' : ''}`
-                } else if (hasVideo) {
-                    preview = `🎬${attachments.length} video${attachments.length > 1 ? 's' : ''}`
-                } else {
-                    preview = `🔗${attachments.length} attachment${attachments.length > 1 ? 's' : ''}`
+                    preview = `🔗${attachments.length} attachments`;
                 }
-            };
-
+                else if (hasImage) {
+                    preview = `📸${attachments.length} image${attachments.length > 1 ? 's' : ''}`;
+                }
+                else if (hasVideo) {
+                    preview = `🎬${attachments.length} video${attachments.length > 1 ? 's' : ''}`;
+                }
+                else {
+                    preview = `🔗${attachments.length} attachment${attachments.length > 1 ? 's' : ''}`;
+                }
+            }
+            ;
             return {
                 id: chat.id,
                 type: "group",
@@ -89,35 +81,33 @@ export const getAllGroupChats = async (id: string) => {
                     sender: lastMessage?.sender.username
                 },
                 unreadCount: chat._count.messages,
-            }
-        })
-
+            };
+        });
         return formattedGroupChats;
-    } catch (err: any) {
-        throw new Error(err.message || "Failed to fetch group chats")
     }
-}
-
-export const createGroup = async (req: AuthRequest, res: Response) => {
+    catch (err) {
+        throw new Error(err.message || "Failed to fetch group chats");
+    }
+};
+export const createGroup = async (req, res) => {
     try {
-
         const userId = req.user?.id;
-        if (!userId) return res.status(401).json({ message: "Unauthorized" });
-
+        if (!userId)
+            return res.status(401).json({ message: "Unauthorized" });
         const { groupName, groupAvatar, groupDescription, memberIds } = req.body;
-
-        if (!groupName || !groupName.trim()) return res.status(400).json({ message: "Group name is required" });
-        if (!memberIds || memberIds.length === 0) return res.status(400).json({ message: "Add at least one member" });
-
-        let groupAvatarUrl: string | null = null;
+        if (!groupName || !groupName.trim())
+            return res.status(400).json({ message: "Group name is required" });
+        if (!memberIds || memberIds.length === 0)
+            return res.status(400).json({ message: "Add at least one member" });
+        let groupAvatarUrl = null;
         if (groupAvatar) {
             const result = await cloudinary.uploader.upload(groupAvatar, {
                 folder: "nod/groups",
                 transformation: [{ width: 200, height: 200, crop: "fill" }],
             });
             groupAvatarUrl = result.secure_url;
-        };
-
+        }
+        ;
         // check if added members are valid
         const validUsers = await prisma.user.findMany({
             where: {
@@ -125,11 +115,9 @@ export const createGroup = async (req: AuthRequest, res: Response) => {
             },
             select: { id: true },
         });
-        const validIds = validUsers.map((user: any) => user.id);
-
+        const validIds = validUsers.map((user) => user.id);
         // creator is also a member...
-        const allMemberIds = [... new Set([...validIds, userId])];
-
+        const allMemberIds = [...new Set([...validIds, userId])];
         const newGroup = await prisma.group.create({
             data: {
                 name: groupName,
@@ -137,7 +125,7 @@ export const createGroup = async (req: AuthRequest, res: Response) => {
                 description: groupDescription || null,
                 ownerId: userId,
                 members: {
-                    create: allMemberIds.map((id: string) => ({
+                    create: allMemberIds.map((id) => ({
                         userId: id,
                         role: id === userId ? "owner" : "member"
                     }))
@@ -155,20 +143,19 @@ export const createGroup = async (req: AuthRequest, res: Response) => {
                 }
             }
         });
-
         return res.status(201).json({
             id: newGroup.id,
             name: newGroup.name,
             description: newGroup.description || null,
             avatar: newGroup.avatar,
-            members: newGroup.members.map((member: any) => ({
+            members: newGroup.members.map((member) => ({
                 ...member.user,
                 role: member.role,
             })),
         });
-
-    } catch (err: any) {
+    }
+    catch (err) {
         console.error("Failed to create group: ", err);
-        return res.status(500).json({ message: "Failed to create group" })
+        return res.status(500).json({ message: "Failed to create group" });
     }
 };

@@ -1,7 +1,7 @@
 import { Response } from "express";
-import { AuthRequest } from "../middleware/auth.middleware.ts";
-import { prisma } from "../lib/prisma.ts";
-import cloudinary from "../lib/cloudinary.ts";
+import { AuthRequest } from "../middleware/auth.middleware.js";
+import { prisma } from "../lib/prisma.js";
+import cloudinary from "../lib/cloudinary.js";
 
 
 
