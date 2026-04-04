@@ -8,7 +8,7 @@ interface UserStore {
     completeOnboarding: (data: { username: string, avatar: string | null, bio: string | null, fullName: string }) => Promise<void>;
 }
 
-export const useUserStore = create<UserStore>((_, _) => ({
+export const useUserStore = create<UserStore>(() => ({
 
     checkUsername: async (data) => {
         try {
