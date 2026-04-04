@@ -5,10 +5,8 @@
   "main": "index.js",
   "scripts": {
     "prebuild": "prisma generate",
-    "build": "tsc",
-    "postbuild": "cp -r generated dist/",
-    "start": "node dist/index.js",
-    "dev": "nodemon --legacy-watch --watch src --ext ts --exec tsx src/index.ts"
+    "build": "tsc && node -e \"require('fs').cpSync('src/generated', 'dist/generated', {recursive: true})\"",
+    "start": "node dist/index.js"
   },
   "keywords": [],
   "author": "",

@@ -17,13 +17,15 @@ export const getAllMessages = async (req: AuthRequest, res: Response) => {
         const { chatId } = req.params;
         const { type } = req.query;
 
+        const chatIdStr = Array.isArray(chatId) ? chatId[0] : chatId;
+        const typeStr = Array.isArray(type) ? type[0] : type;
 
-        if (!type) return res.status(400).json({ message: "type query param required" });
+        if (!typeStr) return res.status(400).json({ message: "type query param required" });
 
         const where =
-            type === "direct" ? { directChatId: chatId } :
-                type === "group" ? { groupId: chatId } :
-                    type === "room" ? { roomId: chatId } :
+            typeStr === "direct" ? { directChatId: chatIdStr } :
+                typeStr === "group" ? { groupId: chatIdStr } :
+                    typeStr === "room" ? { roomId: chatIdStr } :
                         null;
 
         if (!where) return res.status(400).json({ message: "Invalid chat type" });
@@ -86,7 +88,7 @@ const verifyMembership = async (userId: string, chatId: string, chatType: string
 export const sendMessage = async (req: AuthRequest, res: Response) => {
     try {
 
-        
+
 
         const userId = req.user?.id;
         if (!userId) return res.status(401).json({ message: "Unauthorized" });
@@ -103,7 +105,7 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
         if (!chatId || !chatType) {
             return res.status(400).json({ message: "chatId and chatType is are requried" });
         }
-        
+
         if (!["group", "room", "direct"].includes(chatType)) {
             return res.status(400).json({ message: "Invalid chat type" })
         }
@@ -182,17 +184,19 @@ export const deleteMessage = async (req: AuthRequest, res: Response) => {
         if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
         const { messageId } = req.params;
-        if (!messageId) return res.status(400).json({ message: "messageId is requried" });
+        const messageIdStr = Array.isArray(messageId) ? messageId[0] : messageId;
+
+        if (!messageIdStr) return res.status(400).json({ message: "messageId is requried" });
 
         const message = await prisma.message.findFirst({
-            where: { id: messageId },
+            where: { id: messageIdStr },
             select: { senderId: true }
         });
 
         if (!message) return res.status(404).json({ message: "Message not found" });
         if (message.senderId !== userId) return res.status(403).json({ message: "Cannot delete someone else's message" });
 
-        await prisma.message.delete({ where: { id: messageId } });
+        await prisma.message.delete({ where: { id: messageIdStr } });
 
         return res.status(200).json({ message: "Message deleted" });
 
