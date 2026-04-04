@@ -1,5 +1,18 @@
-node_modules
-# Keep environment variables out of version control
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+generated/
+
+# Environment variables
 .env
 
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
 /generated/prisma
