@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
-import { prisma } from "../lib/prisma.ts";
-import { auth } from "../lib/auth.ts";
+import { prisma } from "../lib/prisma.js";
+import { auth } from "../lib/auth.js";
 export const protect = async (req, res, next) => {
     try {
         const token = req.cookies.jwt;

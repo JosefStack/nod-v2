@@ -1,5 +1,5 @@
-import { prisma } from "../../lib/prisma.ts";
-import cloudinary from "../../lib/cloudinary.ts";
+import { prisma } from "../../lib/prisma.js";
+import cloudinary from "../../lib/cloudinary.js";
 export const getAllGroupChats = async (id) => {
     try {
         const userId = id;
