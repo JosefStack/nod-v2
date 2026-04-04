@@ -1,5 +1,5 @@
-import { getAllDirectChats } from "./chat/direct.controller.ts";
-import { getAllGroupChats } from "./chat/group.controller.ts";
+import { getAllDirectChats } from "./chat/direct.controller.js";
+import { getAllGroupChats } from "./chat/group.controller.js";
 export const getAllChats = async (req, res) => {
     try {
         const userId = req.user?.id;
