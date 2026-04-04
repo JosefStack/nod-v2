@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { protect } from "../middleware/auth.middleware.js";
+// import { AuthRequest } from "../middleware/auth.middleware.js";
 import { getAllMessages, sendMessage, deleteMessage } from "../controllers/message.controller.js";
 const messageRouter = Router();
 messageRouter.use(protect);
