@@ -7,7 +7,8 @@
     "prebuild": "prisma generate",
     "build": "tsc",
     "postbuild": "cp -r generated dist/",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "dev": "nodemon --legacy-watch --watch src --ext ts --exec tsx src/index.ts"
   },
   "keywords": [],
   "author": "",
