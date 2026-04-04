@@ -2,7 +2,7 @@ import { prisma } from "../lib/prisma.js";
 import bcrypt from "bcrypt";
 // import jwt from "jsonwebtoken";
 import { generateToken } from "../lib/utils.js";
-import { auth } from "../lib/auth.ts";
+import { auth } from "../lib/auth.js";
 const checkAuth = async (req, res) => {
     try {
         const session = await auth.api.getSession({
