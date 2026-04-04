@@ -1,6 +1,6 @@
 import { useAuthStore } from "@/store/useAuthStore";
 import type { Chat } from "@/types/chat";
-import { HelpCircle, Search, Settings } from "lucide-react";
+import { HelpCircle, Settings } from "lucide-react";
 import { useState } from "react";
 
 // for in development features
@@ -22,8 +22,8 @@ interface Props {
 const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
 
     const { user } = useAuthStore();
-    const [showUserSearch, setShowUserSearch] = useState<boolean>(false);
-    const [showCreateGroup, setShowCreateGroup] = useState<boolean>(false);
+    // const [showUserSearch, setShowUserSearch] = useState<boolean>(false);
+    // const [showCreateGroup, setShowCreateGroup] = useState<boolean>(false);
     const [search, setSearch] = useState("")
 
     return (
@@ -72,6 +72,25 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
 
 
             {/* tab switch */}
+            <div className="flex gap-1 bg-[#121316] rounded-xl p-1">
+                {
+                    (["chats", "rooms"] as Tab[]).map((tab) => (
+                        <button
+                            key={tab}
+                            onClick={() => { setActiveTab(tab) }}
+                            className={`
+                                flex-1 py-2 rounded-lg text-sm font-bold capitalize transition-all 
+                                ${activeTab === tab
+                                    ? "bg-[#24262a] text-white"
+                                    : "text-gray-500 hover:text-gray-300"
+                                }
+                        `}
+                        >
+                            {tab}
+                        </button>
+                    ))
+                }
+            </div>
 
 
             {/* search */}
@@ -93,6 +112,7 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
 
             {/* action button -> add user ... create group */}
 
+
             {/* chats list */}
             <div className="flex-1 overflow-y-auto">
                 <ChatList search={search} onSelectChat={onSelectChat} />
@@ -103,4 +123,4 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
     )
 }
 
-export default Sidebar
+export default Sidebar;
