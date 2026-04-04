@@ -19,7 +19,7 @@ interface AuthStore {
     isSigningUp: boolean;
     isLoggingIn: boolean;
 
-    setUser: (udpatedUser: User) => void;
+    setUser: (updatedUser: User) => void;
 
     checkAuth: () => Promise<void>;
     signup: (data: { email: string, password: string }) => Promise<void>;
@@ -44,7 +44,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         try {
             const response = await axiosInstance.get("/auth/check");
             set({ user: response.data})
-            
+            console.log(get().user)
 
         } catch (err) {
             console.error("Auth check failed: ", err);
@@ -73,7 +73,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         try {
             const response = await axiosInstance.post("/auth/login", data);
             set({ user: response.data })
-            console.log(get().user);
         } catch (err: any) {
             set({ user: null });
             console.log("Login failed: ", err.response?.data?.message || err.message);

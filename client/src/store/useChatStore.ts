@@ -1,53 +1,6 @@
 import { create } from "zustand";
 import axiosInstance from "../lib/axios";
-
-
-
-export interface User {
-    id: string,
-    username: string,
-    name: string,
-    avatar?: string | null,
-};
-
-export interface Attachment {
-    id: string;
-    url: string;
-    fileName?: string | null;
-    size?: string | null;
-    width?: string | null;
-    height?: string | null;
-    duration?: string | null;
-    createdAt: string | null;
-};
-
-export interface LastMessage {
-    preview?: string | null;
-    createdAt?: string | null;
-    sender?: string | null;
-};
-
-export interface Chat {
-    id: string;
-    type: "direct" | "group" | "room";
-    name: string;
-    username?: string | null;
-    avatar?: string | null;
-    unreadCount: number;
-    lastMessage?: LastMessage
-}
-
-export interface Message {
-    id: string;
-    content?: string | null;
-    senderId: string;
-    createdAt: string;
-    updatedAt: string;
-    sender: User;
-    attachments: Attachment[]
-    readBy: { userId: string }[]
-};
-
+import type { User, Chat, Message } from "@/types/chat";
 
 interface ChatStore {
     chats: Chat[];
@@ -121,7 +74,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             set((state) => ({
                 messages: [...state.messages, response.data]
             }))
-            await get().fetchChats();
+            // below line of code would update the preview, but chatList component will reload (will show skeleton) on every new message that is sent
+            // await get().fetchChats(); 
         } catch (err: any) {
             console.error("Failed to send message: ", err.message);
             throw new Error(err.response?.data || err.message || "Failed to send message");
@@ -151,7 +105,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             set((state) => ({
                 chats: [newGroup, ...state.chats]
             }))
-            // why cant i do set({ chats: [newGroup, get().chats] }) => its slightly slower cs i got to lookup the previoud state using get()s
+            // why cant i do set({ chats: [newGroup, get().chats] }) => its slightly slower cs i got to lookup the previoud state using get()
         } catch (err: any) {
             console.error("Failed to create group chat: ", err);
             throw new Error(err.response?.data || err.message || "Failed to create group chat");

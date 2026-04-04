@@ -40,7 +40,7 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
 
         const user = await prisma.user.findUnique({
             where: { id: decoded.userId },
-            select: { id: true, email: true, username: true, isOnboarded: true, avatar: true, bio: true, image: true },
+            select: { id: true, email: true, username: true, name: true, isOnboarded: true, avatar: true, bio: true, image: true },
         });
 
         if (!user) return res.status(401).json({ message: "Unauthorized - User not found" });
