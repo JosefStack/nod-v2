@@ -18,7 +18,7 @@ const ChatPage = () => {
 
     useEffect(() => {
         fetchChats();
-    }, [messages]);
+    }, []);
 
     const handleSelectChat = (chat: Chat) => {
         setActiveChat(chat);

@@ -1,6 +1,6 @@
 import { useAuthStore } from "@/store/useAuthStore";
 import type { Chat } from "@/types/chat";
-import { HelpCircle, Settings } from "lucide-react";
+import { HelpCircle, Search, Settings } from "lucide-react";
 import { useState } from "react";
 
 // for in development features
@@ -75,6 +75,21 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
 
 
             {/* search */}
+            <div className="px-4 py-3">
+                <div className="relative">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+                    </svg>
+                    <input
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Search conversation..."
+                        className="w-full pl-9 pr-4 py-2.5 roundex-xl bg-[#121316] text-white text-sm placeholder:text-gray-600 outline-none focus:ring-1 focus:ring-violet-500/30"
+
+                    />
+
+                </div>
+            </div>
 
             {/* action button -> add user ... create group */}
 

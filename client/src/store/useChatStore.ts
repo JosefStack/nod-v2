@@ -74,7 +74,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             set((state) => ({
                 messages: [...state.messages, response.data]
             }))
-            await get().fetchChats();
+            // below line of code would update the preview, but chatList component will reload (will show skeleton) on every new message that is sent
+            // await get().fetchChats(); 
         } catch (err: any) {
             console.error("Failed to send message: ", err.message);
             throw new Error(err.response?.data || err.message || "Failed to send message");
