@@ -3,12 +3,12 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
-import authRouter from "./routes/authRoutes.ts";
+import authRouter from "./routes/authRoutes.js";
 import { toNodeHandler } from "better-auth/node";
-import { auth } from "./lib/auth.ts";
-import userRouter from "./routes/userRoutes.ts";
-import chatRouter from "./routes/chatRoutes.ts";
-import messageRouter from "./routes/messageRoutes.ts";
+import { auth } from "./lib/auth.js";
+import userRouter from "./routes/userRoutes.js";
+import chatRouter from "./routes/chatRoutes.js";
+import messageRouter from "./routes/messageRoutes.js";
 
 
 const app = express();
