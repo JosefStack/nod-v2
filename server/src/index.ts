@@ -11,6 +11,11 @@ import chatRouter from "./routes/chatRoutes.js";
 import messageRouter from "./routes/messageRoutes.js";
 
 
+// debugging
+import { readdirSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -22,6 +27,9 @@ app.use(cors({
     credentials: true,
 }));
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+
 app.all('/api/auth/{*any}', toNodeHandler(auth));
 
 app.use(express.json({ limit: "50mb" }));
@@ -32,10 +40,17 @@ app.use('/api/user', userRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/message', messageRouter);
 
+// debugging
 app.get("/", (req, res) => {
     res.json({ status: "ok", env: process.env.NODE_ENV });
 });
 
+
+app.get("/debug", (req, res) => {
+    const routes = readdirSync(join(__dirname, "routes"));
+    const controllers = readdirSync(join(__dirname, "controllers"));
+    res.json({ routes, controllers });
+});
 
 
 
