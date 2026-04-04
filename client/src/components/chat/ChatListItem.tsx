@@ -19,14 +19,14 @@ const formatTime = (dateStr?: string | null) => {
 
 interface Props {
     chat: Chat;
-    onClick: () => void;
+    onSelectChat: (chat: Chat) => void;
     isSelected: boolean;
 }
 
-const ChatListItem = ({ chat, onClick, isSelected }: Props) => {
+const ChatListItem = ({ chat, onSelectChat, isSelected }: Props) => {
     return (
         <button
-            onClick={onClick}
+            onClick={() => onSelectChat(chat)}
             className={`
                 w-full flex items-center gap-3 px-4 py-3 transition-all text-left border-l-2
                 ${isSelected ?
@@ -67,8 +67,8 @@ const ChatListItem = ({ chat, onClick, isSelected }: Props) => {
                     <span className="text-xs text-gray-500 truncate">
                         {
                             chat.lastMessage?.sender && chat.type === "group" ?
-                                `${chat.lastMessage.sender}: ${chat.lastMessage.preview} || ""` :
-                                chat.lastMessage?.preview || "No messages yet"
+                                `${chat.lastMessage.sender}: ${chat.lastMessage.preview  || ""}` :
+                                chat.lastMessage?.preview || "No messages yet"  
                         }
                     </span>
                     {

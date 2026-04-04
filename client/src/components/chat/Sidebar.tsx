@@ -9,6 +9,7 @@ import {
     HoverCardContent,
     HoverCardTrigger,
 } from "@/components/ui/hover-card"
+import ChatList from "./ChatList";
 
 
 type Tab = "rooms" | "chats";
@@ -23,6 +24,7 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
     const { user } = useAuthStore();
     const [showUserSearch, setShowUserSearch] = useState<boolean>(false);
     const [showCreateGroup, setShowCreateGroup] = useState<boolean>(false);
+    const [search, setSearch] = useState("")
 
     return (
         <div className="flex flex-col h-full bg-[#0d0e11]">
@@ -78,7 +80,7 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
 
             {/* chats list */}
             <div className="flex-1 overflow-y-auto">
-                
+                <ChatList search={search} onSelectChat={onSelectChat} />
             </div>
 
         </div>

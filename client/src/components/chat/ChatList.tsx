@@ -1,11 +1,20 @@
+import ChatListItem from "./ChatListItem";
+import ChatListSkeleton from "../skeletons/ChatListSkeletion";
+import type { Chat } from "@/types/chat";
 
 
-const ChatList = () => {
+
+interface Props {
+    search: string;
+    onSelectChat: (chat: Chat) => void;
+}
+
+const ChatList = ({ search, onSelectChat }: Props) => {
     return (
-        <div>
-
+        <div className="">
+                
         </div>
     )
 }
 
-export default ChatList
+export default ChatList;
