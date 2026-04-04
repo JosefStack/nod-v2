@@ -4,16 +4,11 @@
         "module": "NodeNext",
         "moduleResolution": "NodeNext",
         "outDir": "dist",
-        "rootDir": ".",
-        "strict": true,
+        "rootDir": "src",
+        "strict": false,
         "esModuleInterop": true,
-        "skipLibCheck": true,
-        "resolveJsonModule": true
+        "skipLibCheck": true
     },
-    "include": [
-        "src/**/*",
-        "generated/**/*",      
-        "prisma.config.ts"
-    ],
-    "exclude": ["node_modules"]
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "dist"]
 }
