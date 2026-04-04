@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { protect } from "../middleware/auth.middleware.ts";
-import { updateProfile } from "../controllers/user.controller.ts";
-import { checkUsername, searchUsers } from "../controllers/user.controller.ts";
+import { protect } from "../middleware/auth.middleware.js";
+import { updateProfile } from "../controllers/user.controller.js";
+import { checkUsername, searchUsers } from "../controllers/user.controller.js";
 const userRouter = Router();
 userRouter.use(protect);
 userRouter.patch("/update-profile", updateProfile);
