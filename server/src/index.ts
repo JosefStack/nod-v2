@@ -16,13 +16,15 @@ const PORT = process.env.PORT || 3000;
 
 app.use(helmet());
 app.use(cors({
-    origin: process.env.NODE_ENV === "development" ? "http://localhost:5173" : process.env.CLIENT_URL,
+    origin: process.env.NODE_ENV === "production" 
+        ? process.env.CLIENT_URL 
+        : "http://localhost:5173",
     credentials: true,
 }));
 
+app.all('/api/auth/{*any}', toNodeHandler(auth));
 
-
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
 app.use(cookieParser());
 
 app.use('/api/auth', authRouter);
@@ -31,7 +33,7 @@ app.use('/api/chat', chatRouter);
 app.use('/api/message', messageRouter);
 
 
-app.all('/api/auth/{*any}', toNodeHandler(auth));
+
 
 
 
