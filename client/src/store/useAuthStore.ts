@@ -36,14 +36,14 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     isSigningUp: false,
     isLoggingIn: false,
 
-    setUser: (updatedUser: User ) => {
+    setUser: (updatedUser: User) => {
         set({ user: updatedUser });
     },
 
     checkAuth: async () => {
         try {
             const response = await axiosInstance.get("/auth/check");
-            set({ user: response.data})
+            set({ user: response.data })
             console.log(get().user)
 
         } catch (err) {
@@ -94,17 +94,17 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     signInWithGoogle: async () => {
         await authClient.signIn.social({
             provider: "google",
-            callbackURL: "http://localhost:5173/",
+            callbackURL: import.meta.env.DEV ? "http://localhost:5173/" : import.meta.env.VITE_CALLBACK_URL,
         });
     },
 
     signInWithGithub: async () => {
         await authClient.signIn.social({
             provider: "github",
-            callbackURL: "http://localhost:5173/",
+            callbackURL: import.meta.env.DEV ? "http://localhost:5173/" : import.meta.env.VITE_CALLBACK_URL,
         });
     },
 
-    
+
 }))
 
