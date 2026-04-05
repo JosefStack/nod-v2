@@ -28,6 +28,7 @@ const MessageInput = () => {
             setAttachments([]);
             if (textareaRef.current) textareaRef.current.style.height = "auto"
         } catch (err: any) {
+            console.error(JSON.stringify(err));
             toast.error("Failed to send message");
         }
     }

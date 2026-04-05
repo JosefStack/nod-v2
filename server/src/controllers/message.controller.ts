@@ -126,7 +126,7 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
                     return {
                         url: result.secure_url,
                         type: attachment.type,
-                        fiNename: attachment.fileName || null,
+                        fileName: attachment.fileName || null,
                         size: attachment.size || null,
                         width: result.width || null,
                         height: result.height || null,
