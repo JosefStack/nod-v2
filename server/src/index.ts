@@ -30,7 +30,6 @@ app.use(cors({
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 
-app.all('/api/auth/{*any}', toNodeHandler(auth));
 
 app.use(express.json({ limit: "50mb" }));
 app.use(cookieParser());
@@ -39,6 +38,8 @@ app.use('/api/auth', authRouter);
 app.use('/api/user', userRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/message', messageRouter);
+
+app.all('/api/auth/{*any}', toNodeHandler(auth));
 
 // debugging
 app.get("/", (req, res) => {

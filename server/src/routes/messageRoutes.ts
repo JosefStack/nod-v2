@@ -7,7 +7,7 @@ import { getAllMessages, sendMessage, deleteMessage } from "../controllers/messa
 
 const messageRouter = Router();
 
-messageRouter.use(protect);
+// messageRouter.use(protect);
 
 messageRouter.get("/:chatId", getAllMessages);
 messageRouter.post("/send", sendMessage);
