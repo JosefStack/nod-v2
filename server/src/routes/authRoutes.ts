@@ -6,7 +6,9 @@ import { protect } from "../middleware/auth.middleware.js";
 
 const authRouter = Router();
 
-authRouter.get("/check", protect, checkAuth); 
+authRouter.use(protect);
+
+authRouter.get("/check", checkAuth); 
 
 authRouter.post("/signup", signup);
 authRouter.post("/login", login);
