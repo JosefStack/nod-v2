@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma.js";
 import { auth } from "../lib/auth.js";
 
-export interface AuthRequest extends Request {
+export type AuthRequest = Request & {
     user?: {
         id: string;
         email: string;
