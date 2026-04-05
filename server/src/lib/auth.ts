@@ -7,6 +7,14 @@ export const auth = betterAuth({
     database: prismaAdapter(prisma, {
         provider: "postgresql",
     }),
+
+    advanced: {
+        defaultCookieAttributes: {
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            secure: process.env.NODE_ENV === "production",
+        }
+    },
+    
     emailAndPassword: {
         enabled: true,
     },
@@ -29,12 +37,14 @@ export const auth = betterAuth({
             : "http://localhost:3000",
     ],
 
-        cookies: {
-    sessionToken: {
-        attributes: {
-            secure: true,
-            sameSite: "none",
+    cookies: {
+        sessionToken: {
+            attributes: {
+                secure: true,
+                sameSite: "none",
+            },
         },
     },
-},
+
+
 });
