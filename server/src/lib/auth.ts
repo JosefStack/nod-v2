@@ -21,8 +21,10 @@ export const auth = betterAuth({
         },
     },
     trustedOrigins: [
-        process.env.NODE_ENV === "production" ? process.env.CLIENT_URL : "http://localhost:5173",
-        process.env.NODE_ENV === "production" ? process.env.BETTER_AUTH_URL : "http://localhost:3000",
+        "http://localhost:5173",       
+        "https://nod-seven.vercel.app", 
+        "http://localhost:3000",        
+        "https://nod-v2.onrender.com"
     ],
 
     cookies: {
