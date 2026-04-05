@@ -16,7 +16,7 @@ export interface AuthRequest<
         isOnboarded: boolean;
         image: string;
     };
-    cookies: { [key: string]: string };
+    cookies: Record<string, string>;
 }
 
 export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -25,7 +25,9 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
 
         if (!token) {
             const session = await auth.api.getSession({
-                headers: req.headers as any,
+                headers: Object.fromEntries(
+                    Object.entries(req.headers).map(([key, value]) => [key, Array.isArray(value) ? value.join(",") : value || ""])
+                )
             });
 
             if (session?.user) {
