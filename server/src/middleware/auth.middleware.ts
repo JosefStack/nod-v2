@@ -2,21 +2,18 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma.js";
 import { auth } from "../lib/auth.js";
-import "cookie-parser";
 
-export interface AuthRequest<
-    Body = any,
-    Query = any,
-    Params = any
-> extends Request<Params, any, Body, Query> {
+export interface AuthRequest extends Request {
     user?: {
         id: string;
         email: string;
         username: string | null;
+        name: string | null;
+        avatar: string | null;
+        bio: string | null;
+        image: string | null;
         isOnboarded: boolean;
-        image: string;
-    };
-    cookies: Record<string, string>;
+    }
 }
 
 export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -25,9 +22,7 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
 
         if (!token) {
             const session = await auth.api.getSession({
-                headers: Object.fromEntries(
-                    Object.entries(req.headers).map(([key, value]) => [key, Array.isArray(value) ? value.join(",") : value || ""])
-                )
+                headers: req.headers as any,
             });
 
             if (session?.user) {
