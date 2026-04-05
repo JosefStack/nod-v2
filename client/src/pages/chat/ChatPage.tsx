@@ -26,10 +26,10 @@ const ChatPage = () => {
         setIsMobileChatOpen(true);
     };
 
-    // const handleBack = () => {
-    //     setActiveChat(null);
-    //     setIsMobileChatOpen(false);
-    // }
+    const handleBack = () => {
+        setActiveChat(null);
+        setIsMobileChatOpen(false);
+    }
 
 
 
@@ -58,7 +58,7 @@ const ChatPage = () => {
                 flex-col flex-1 min-w-0
             `}>
                 {activeTab === "chats" && activeChat ? (
-                    <ChatWindow />
+                    <ChatWindow onBack={handleBack}/>
                 ) : activeTab === "rooms" ? (
                     <RoomWindow />
                 ) :

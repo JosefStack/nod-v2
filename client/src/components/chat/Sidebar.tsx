@@ -110,8 +110,9 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
                 </div>
             </div>
 
-            {/* action button -> add user ... create group */}
-
+            {/* action buttons -> add user ... create group */}
+            
+                
 
             {/* chats list */}
             <div className="flex-1 overflow-y-auto">
