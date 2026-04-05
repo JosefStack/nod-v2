@@ -1,5 +1,5 @@
 import "dotenv/config";
-import express from "express";  
+import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
@@ -20,15 +20,25 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(helmet());
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://nod-seven.vercel.app",
+];
+
 app.use(cors({
-    origin: process.env.NODE_ENV === "production" 
-        ? process.env.CLIENT_URL 
-        : "http://localhost:5173",
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.log("Blocked by CORS:", origin);
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     credentials: true,
 }));
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+// console.log(process.env.NODE_ENV === "production")
 
 
 app.use(express.json({ limit: "50mb" }));
