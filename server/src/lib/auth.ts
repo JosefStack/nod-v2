@@ -24,4 +24,13 @@ export const auth = betterAuth({
         process.env.NODE_ENV === "production" ? process.env.CLIENT_URL : "http://localhost:5173",
         process.env.NODE_ENV === "production" ? process.env.BETTER_AUTH_URL : "http://localhost:3000",
     ],
+
+    cookies: {
+        sessionToken: {
+            attributes: {
+                secure: true,
+                sameSite: "none",
+            },
+        },
+    },
 });
