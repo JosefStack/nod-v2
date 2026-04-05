@@ -9,14 +9,30 @@ import { auth } from "./lib/auth.js";
 import userRouter from "./routes/userRoutes.js";
 import chatRouter from "./routes/chatRoutes.js";
 import messageRouter from "./routes/messageRoutes.js";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(helmet());
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://nod-seven.vercel.app",
+];
 app.use(cors({
-    origin: process.env.NODE_ENV === "development" ? "http://localhost:5173" : process.env.CLIENT_URL,
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        }
+        else {
+            console.log("Blocked by CORS:", origin);
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     credentials: true,
 }));
-app.use(express.json());
+const __dirname = dirname(fileURLToPath(import.meta.url));
+// console.log(process.env.NODE_ENV === "production")
+app.use(express.json({ limit: "50mb" }));
 app.use(cookieParser());
 app.use('/api/auth', authRouter);
 app.use('/api/user', userRouter);

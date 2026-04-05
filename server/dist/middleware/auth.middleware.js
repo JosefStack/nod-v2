@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma.js";
 import { auth } from "../lib/auth.js";
+import "cookie-parser";
 export const protect = async (req, res, next) => {
     try {
         const token = req.cookies.jwt;
