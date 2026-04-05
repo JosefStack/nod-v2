@@ -2,15 +2,21 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma.js";
 import { auth } from "../lib/auth.js";
+import "cookie-parser";
 
-export interface AuthRequest extends Request {
+export interface AuthRequest<
+    Body = any,
+    Query = any,
+    Params = any
+> extends Request<Params, any, Body, Query> {
     user?: {
         id: string;
         email: string;
         username: string | null;
         isOnboarded: boolean;
         image: string;
-    }
+    };
+    cookies: { [key: string]: string };
 }
 
 export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -31,7 +37,7 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
                 if (!user) return res.status(401).json({ message: "Unauthorized - User not found" })
                 req.user = user;
             }
-                        
+
             next();
             return;
         }
