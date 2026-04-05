@@ -43,20 +43,6 @@ app.all('/api/auth/{*any}', toNodeHandler(auth));
 
 
 
-// debugging
-app.get("/", (req, res) => {
-    res.json({ status: "ok", env: process.env.NODE_ENV });
-});
-
-
-app.get("/debug", (req, res) => {
-    const routes = readdirSync(join(__dirname, "routes"));
-    const controllers = readdirSync(join(__dirname, "controllers"));
-    res.json({ routes, controllers });
-});
-
-
-
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 })
