@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { Toaster } from "sonner";
 import Onboarding from "./pages/onboarding/Onboarding";
 import ChatPage from "./pages/chat/ChatPage";
-// import { Divide } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 
 const App = () => {
@@ -18,14 +18,17 @@ const App = () => {
   }, []);
 
   if (isCheckingAuth) {
-    return <div>Loading...</div>;
+    return <div className="fixed inset-0 z-50 flex items-center justify-center gap-1 bg-black">
+        <Spinner className="size-6 text-white"/>
+        <span className="text-white">Loading</span>
+    </div>
   };
 
   return (
 
     <>
       <Routes>
-        <Route path="/" element={user ? (user.isOnboarded ? < ChatPage /> : <Navigate to="/onboarding" />): <Navigate to="/login" />} />
+        <Route path="/" element={user ? (user.isOnboarded ? < ChatPage /> : <Navigate to="/onboarding" />) : <Navigate to="/login" />} />
         <Route path="/signup" element={user ? <Navigate to="/" /> : <Signup />} />
         <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
         <Route path="/onboarding" element={!user ? <Navigate to="/login" /> : (user?.isOnboarded ? <Navigate to="/" /> : <Onboarding />)} />
