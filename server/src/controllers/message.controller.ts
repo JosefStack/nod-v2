@@ -170,7 +170,7 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
 
     } catch (err: any) {
         console.log("Failed to send message: ", err)
-        return res.status(500).json({ message: "Failed to send message" })
+        return res.status(500).json({ message: err.message || "Failed to send message" })
     }
 
 };

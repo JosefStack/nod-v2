@@ -21,6 +21,7 @@ interface ChatStore {
 
     setActiveChat: (chat: Chat | null) => Promise<void>;
     clearMessages: () => void;
+    
 }
 
 

@@ -9,6 +9,7 @@ export interface Attachment {
     id: string;
     url: string;
     fileName?: string | null;
+    type: string
     size?: string | null;
     width?: string | null;
     height?: string | null;
