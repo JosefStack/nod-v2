@@ -179,7 +179,6 @@ const MessageBubble = ({ message, showDateLabel }: Props) => {
               ${message.readBy.length > 0 ? "text-violet-400" : " text-gray-500"}`}>
               {message.readBy.length > 0 ? "✓✓" : "✓"}
             </span>
-
           </div>
 
         </div>
