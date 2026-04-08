@@ -176,8 +176,8 @@ const MessageBubble = ({ message, showDateLabel }: Props) => {
               {formatTime(message.createdAt)}
             </span>
             <span className={`text-[10px] 
-              ${message.readBy.length > 0 ? "text-violet-400" : " text-gray-500"}`}>
-              {message.readBy.length > 0 ? "✓✓" : "✓"}
+              ${message.readBy?.length > 0 ? "text-violet-400" : " text-gray-500"}`}>
+              {message.readBy?.length > 0 ? "✓✓" : "✓"}
             </span>
           </div>
 
