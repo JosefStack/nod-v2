@@ -26,10 +26,16 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
     // const [showUserSearch, setShowUserSearch] = useState<boolean>(false);
     // const [showCreateGroup, setShowCreateGroup] = useState<boolean>(false);
     const [search, setSearch] = useState("")
+    const [showUserSearch, setShowUserSearch] = useState(true);
 
     return (
-        <div className="flex flex-col h-full bg-[#0d0e11]"> 
-        <UserSearchModal />
+        <div className="flex flex-col h-full bg-[#0d0e11]">
+
+            {showUserSearch &&
+                <UserSearchModal
+                    onClose={() => setShowUserSearch(false)}
+                />}
+
 
             {/* user header */}
             <div className="px-4 pt-5 pb-3 border-b border-gray-800/50">
@@ -113,8 +119,8 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
             </div>
 
             {/* action buttons -> add user ... create group */}
-            
-                
+
+
 
             {/* chats list */}
             <div className="flex-1 overflow-y-auto">
