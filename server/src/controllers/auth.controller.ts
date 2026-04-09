@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import { generateToken } from "../lib/utils.js";
 import { auth } from "../lib/auth.js";
 import { AuthRequest } from "../middleware/auth.middleware.js";
+import { formCsrfMiddleware } from "better-auth/api";
 
 const checkAuth = async (req: AuthRequest, res: Response) => {
 
@@ -85,6 +86,8 @@ const login = async (req: Request, res: Response) => {
         const match = await bcrypt.compare(password, user.password);
         if (!match) return res.status(401).json({ message: "Invalid credentials" });
 
+        delete user.password;
+        
         generateToken(user.id, res);
         return res.status(200).json(user);
 
