@@ -1,5 +1,5 @@
 import { useChatStore } from "@/store/useChatStore";
-import { Search, X } from "lucide-react"
+import { MessageSquare, Search, X } from "lucide-react"
 import { useEffect, useState } from "react"
 
 
@@ -71,10 +71,35 @@ const UserSearchModal = ({ onClose }: Props) => {
                             </div>
                         ) : (
                             searchResults.map((user) => (
-                                <div 
-                                key={user.id}
-                                className="flex items-center justify-between px-5 py-3 hover:bg-[#1e2023] transition-colors"
+                                <div
+                                    key={user.id}
+                                    className="flex items-center justify-between px-5 py-3 hover:bg-[#1e2023] transition-colors"
                                 >
+                                    <div className="flex-1 not-visited:flex items-center gap-3 ">
+                                        <div className="w-10 h-10 rounded-full bg-[#24262a] flex items-center justify-center text-gray-400 
+                                                        font-bold text-sm overflow-hidden">
+                                            {
+                                                user.avatar
+                                                    ? <img src={user.avatar}></img>
+                                                    : user.name?.[0].toUpperCase() ||user.username?.[0].toUpperCase()
+                                            }
+                                        </div>
+
+                                        <div>
+                                            <p className="text-white text-sm font-bold ">{user.name || user.username}</p>
+                                            <p className="text-gray-500 text-xs ">@{user.username}</p>
+                                        </div>
+
+                                        <button
+                                            onClick={() => {return;}}
+                                            className="p-2 ml-auto text-violet-400 hover:text-violet-300 hover:bg-violet-500/10 rounded-xl transition-all disabled:opacity-50"
+                                        >
+                                            <MessageSquare size={16} />
+                                        </button>
+
+                                    </div>
+
+
 
                                 </div>
                             ))

@@ -1,6 +1,6 @@
 import { useAuthStore } from "@/store/useAuthStore";
 import type { Chat } from "@/types/chat";
-import { HelpCircle, Settings } from "lucide-react";
+import { HelpCircle, MessageSquarePlus, Settings, Users } from "lucide-react";
 import { useState } from "react";
 
 // for in development features
@@ -26,7 +26,7 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
     // const [showUserSearch, setShowUserSearch] = useState<boolean>(false);
     // const [showCreateGroup, setShowCreateGroup] = useState<boolean>(false);
     const [search, setSearch] = useState("")
-    const [showUserSearch, setShowUserSearch] = useState(true);
+    const [showUserSearch, setShowUserSearch] = useState(false);
 
     return (
         <div className="flex flex-col h-full bg-[#0d0e11]">
@@ -119,7 +119,26 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
             </div>
 
             {/* action buttons -> add user ... create group */}
-
+            {activeTab === "chats" && (
+                <div className="px-4 pb-3 flex gap-2">
+                    <button
+                        onClick={() => setShowUserSearch(true)}
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#121316]
+                                text-gray-400 hover:bg-[#1e2023] transition-all text-sm font-medium"
+                    >
+                        <MessageSquarePlus size={15} />
+                        <span>Add user</span>
+                    </button>
+                    <button
+                        onClick={() => setShowUserSearch(true)}
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#121316]
+                                text-gray-400 hover:bg-[#1e2023] transition-all text-sm font-medium"
+                    >
+                        <Users size={15} />
+                        <span>New group</span>
+                    </button>
+                </div>
+            )}
 
 
             {/* chats list */}
