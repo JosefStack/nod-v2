@@ -10,6 +10,7 @@ import {
     HoverCardTrigger,
 } from "@/components/ui/hover-card"
 import ChatList from "./ChatList";
+import UserSearchModal from "../modals/UserSearchModal";
 
 
 type Tab = "rooms" | "chats";
@@ -27,7 +28,8 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
     const [search, setSearch] = useState("")
 
     return (
-        <div className="flex flex-col h-full bg-[#0d0e11]">
+        <div className="flex flex-col h-full bg-[#0d0e11]"> 
+        <UserSearchModal />
 
             {/* user header */}
             <div className="px-4 pt-5 pb-3 border-b border-gray-800/50">
