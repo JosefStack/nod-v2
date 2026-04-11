@@ -31,7 +31,7 @@ const ChatList = ({ search, onSelectChat }: Props) => {
     }
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col ">
             {
                 filtered.map((chat) => (
                     <ChatListItem
