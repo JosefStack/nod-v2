@@ -1,17 +1,40 @@
 import { useChatStore } from "@/store/useChatStore";
-import { MessageSquare, Search, X } from "lucide-react"
+import type { Chat, User } from "@/types/chat";
+import { Loader, MessageSquare, Search, X } from "lucide-react"
 import { useEffect, useState } from "react"
+import { toast } from "sonner";
 
 
 interface Props {
     onClose: () => void;
+    onSelectChat: (chat: Chat) => void;
 }
 
-const UserSearchModal = ({ onClose }: Props) => {
+const UserSearchModal = ({ onClose, onSelectChat }: Props) => {
 
-    const { searchUsers, searchResults, isSearching, createDirectChat, } = useChatStore();
+    const { searchUsers, searchResults, isSearching, createDirectChat, fetchChats } = useChatStore();
+    const [query, setQuery] = useState<string>("");
+    const [isCreatingChat, setIsCreatingChat] = useState<string | null>(null);
 
-    const [query, setQuery] = useState("");
+    const handleAddUser = async (user: User) => {
+        setIsCreatingChat(user.id);
+        try {
+            await createDirectChat(user.id);
+            fetchChats();
+            const { chats } = useChatStore.getState();
+            const chat = chats.find((chat) => chat.type === "direct" && chat.username === user.username);
+            console.log(chat)
+            if (chat) onSelectChat(chat);
+            onClose();
+
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to create chat")
+        } finally {
+            setIsCreatingChat(null);
+        }
+
+    }
 
 
     useEffect(() => {
@@ -28,7 +51,7 @@ const UserSearchModal = ({ onClose }: Props) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-            <div className="w-full bg-[#121316] rounded-2xl border border-gray-800 overflow-hidden shadow-2xl">
+            <div className="w-full max-w-md bg-[#121316] rounded-2xl border border-gray-800 overflow-hidden shadow-2xl">
 
 
                 {/* header */}
@@ -81,7 +104,7 @@ const UserSearchModal = ({ onClose }: Props) => {
                                             {
                                                 user.avatar
                                                     ? <img src={user.avatar}></img>
-                                                    : user.name?.[0].toUpperCase() ||user.username?.[0].toUpperCase()
+                                                    : user.name?.[0].toUpperCase() || user.username?.[0].toUpperCase()
                                             }
                                         </div>
 
@@ -91,10 +114,15 @@ const UserSearchModal = ({ onClose }: Props) => {
                                         </div>
 
                                         <button
-                                            onClick={() => {return;}}
+                                            onClick={() => { handleAddUser(user) }}
                                             className="p-2 ml-auto text-violet-400 hover:text-violet-300 hover:bg-violet-500/10 rounded-xl transition-all disabled:opacity-50"
                                         >
-                                            <MessageSquare size={16} />
+                                            {
+                                                isCreatingChat === user.id ?
+                                                    <Loader size={16} /> :
+                                                    <MessageSquare size={16} />
+                                            }
+
                                         </button>
 
                                     </div>

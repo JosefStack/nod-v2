@@ -42,10 +42,10 @@ const ChatListItem = ({ chat, onSelectChat, isSelected }: Props) => {
             text-gray-400 font-bold overflow-hidden text-sm">
                     {
                         chat.avatar ?
-                            <img src={chat.avatar} alt={chat.name} className="w-full h-full object-cover" /> :
+                            <img src={chat.avatar} alt={chat.name? chat.name : chat.username as string} className="w-full h-full object-cover" /> :
                             chat.type === "group" ?
                                 <span className="text-lg">👥</span> :
-                                <span>{chat.name[0]?.toUpperCase() || "?"}</span>
+                                <span>{chat.name? chat.name[0].toUpperCase() : "?"}</span>
                     }
                 </div>
             </div>

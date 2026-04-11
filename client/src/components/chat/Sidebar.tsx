@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/hover-card"
 import ChatList from "./ChatList";
 import UserSearchModal from "../modals/UserSearchModal";
+import CreateGroupModal from "../modals/CreateGroupModal";
 
 
 type Tab = "rooms" | "chats";
@@ -27,14 +28,26 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
     // const [showCreateGroup, setShowCreateGroup] = useState<boolean>(false);
     const [search, setSearch] = useState("")
     const [showUserSearch, setShowUserSearch] = useState(false);
+    const [showCreateGroup, setShowCreateGroup] = useState(false);
 
     return (
         <div className="flex flex-col h-full bg-[#0d0e11]">
 
             {showUserSearch &&
                 <UserSearchModal
+                    onSelectChat={onSelectChat}
                     onClose={() => setShowUserSearch(false)}
-                />}
+                />
+            }
+
+            { showCreateGroup &&
+                <CreateGroupModal
+                    // onSelectChat={onSelectChat}
+                    onClose={() => setShowCreateGroup(false)}
+                />
+            }
+
+
 
 
             {/* user header */}
@@ -111,7 +124,7 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search conversation..."
-                        className="w-full pl-9 pr-4 py-2.5 roundex-xl bg-[#121316] text-white text-sm placeholder:text-gray-600 outline-none focus:ring-1 focus:ring-violet-500/30"
+                        className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-[#121316] text-white text-sm placeholder:text-gray-600 outline-none focus:ring-1 focus:ring-violet-500/30"
 
                     />
 
@@ -130,7 +143,7 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
                         <span>Add user</span>
                     </button>
                     <button
-                        onClick={() => setShowUserSearch(true)}
+                        onClick={() => setShowCreateGroup(true)}
                         className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#121316]
                                 text-gray-400 hover:bg-[#1e2023] transition-all text-sm font-medium"
                     >
