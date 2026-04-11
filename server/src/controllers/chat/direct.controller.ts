@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { prisma } from "../../lib/prisma.js";
 import { AuthRequest } from "../../middleware/auth.middleware.js";
+import { revokeOtherSessions } from "better-auth/api";
 
 
 export const getAllDirectChats = async (id: string) => {
@@ -138,13 +139,15 @@ export const getOrCreateDirectChat = async (req: AuthRequest, res: Response) => 
                 ]
             }
         });
-        
+
         if (existingDirectChat) {
             return res.status(200).json({
                 id: existingDirectChat.id,
                 type: "direct",
                 isNew: false,
-                other: targetUser,
+                name: targetUser.name,
+                username: targetUser.username,
+                avatar: targetUser.avatar,
             });
         };
 
@@ -152,7 +155,7 @@ export const getOrCreateDirectChat = async (req: AuthRequest, res: Response) => 
             data: {
                 participants: {
                     create: [
-                        { userId }, 
+                        { userId },
                         { userId: targetUserId }
                     ]
                 }
@@ -163,7 +166,9 @@ export const getOrCreateDirectChat = async (req: AuthRequest, res: Response) => 
             id: newChat.id,
             type: "direct",
             isNew: true,
-            other: targetUser,
+            name: targetUser.name,
+            username: targetUser.username,
+            avatar: targetUser.avatar,
         })
 
 
@@ -171,7 +176,7 @@ export const getOrCreateDirectChat = async (req: AuthRequest, res: Response) => 
     } catch (err: any) {
         console.error(err || "error creating chat or fetching existing chat")
         return res.status(500).json({ message: "Failed to create direct chat" })
-    } 
+    }
 
 
 }

@@ -33,6 +33,7 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
 
             {showUserSearch &&
                 <UserSearchModal
+                    onSelectChat={onSelectChat}
                     onClose={() => setShowUserSearch(false)}
                 />}
 
