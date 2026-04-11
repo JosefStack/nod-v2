@@ -1,8 +1,7 @@
 import { useChatStore } from "@/store/useChatStore";
 import { Camera, Check, Search, X } from "lucide-react";
-import { useRef, useState } from "react"
+import { useRef, useState } from "react";
 import { Skeleton } from "../ui/skeleton";
-
 
 interface Props {
     onClose: () => void;
