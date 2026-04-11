@@ -18,8 +18,8 @@ export const generateToken = (userId: string, res: Response): string => {
         {
             maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
             httpOnly: true,
-            sameSite: NODE_ENV === "development" ? "lax" : "none",
-            secure: NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            secure: process.env.NODE_ENV === "production",
         }
     )
 
