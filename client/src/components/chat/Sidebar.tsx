@@ -42,7 +42,7 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
 
             { showCreateGroup &&
                 <CreateGroupModal
-                    // onSelectChat={onSelectChat}
+                    onSelectChat={onSelectChat}
                     onClose={() => setShowCreateGroup(false)}
                 />
             }
