@@ -1,15 +1,18 @@
 import { useChatStore } from "@/store/useChatStore";
-import { Camera, Check, Search, X } from "lucide-react";
+import { Camera, Check, Loader2, Search, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { Skeleton } from "../ui/skeleton";
+import type { Chat } from "@/types/chat";
+import { toast } from "sonner";
 
 interface Props {
     onClose: () => void;
+    onSelectChat: (chat: Chat) => void;
 }
 
-const CreateGroupModal = ({ onClose }: Props) => {
+const CreateGroupModal = ({ onClose, onSelectChat }: Props) => {
 
-    const { searchUsers, searchResults, isSearching } = useChatStore();
+    const { searchUsers, searchResults, isSearching, createGroup } = useChatStore();
 
     const [step, setStep] = useState<"details" | "members">("details")
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -18,7 +21,7 @@ const CreateGroupModal = ({ onClose }: Props) => {
     const [groupDescription, setGroupDescription] = useState("");
     const [query, setQuery] = useState("")
     const [selected, setSelected] = useState<{ id: string, username: string }[]>([]);
-
+    const [isCreating, setIsCreating] = useState<boolean>(false);
 
     const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -41,6 +44,31 @@ const CreateGroupModal = ({ onClose }: Props) => {
         setSelected((prev) => (
             prev.some((u) => u.id === user.id) ? prev.filter((i) => i.id !== user.id) : [...prev, user]
         ))
+    }
+
+    const handleCreate = async () => {
+        if (!groupName.trim() || selected.length === 0) return;
+        setIsCreating(true);
+        // groupName: string, memberIds: string[], groupDescription?: string, groupAvatar?: string
+        try {
+            await createGroup({
+                groupName: groupName.trim(),
+                groupDescription: groupDescription.trim() || undefined,
+                groupAvatar: avatarPreview || undefined,
+                memberIds: selected.map(user => user.id)
+            })
+
+            const { chats } = useChatStore.getState();
+            const newGroup = chats[0];
+
+            if (newGroup) onSelectChat(newGroup);
+            toast.success("Group created!");
+            onClose();
+        } catch (err) {
+            toast.error("Failed to create group");
+        } finally {
+            setIsCreating(false);
+        }
     }
 
     return (
@@ -110,7 +138,7 @@ const CreateGroupModal = ({ onClose }: Props) => {
                                     className="flex-1 py-3 rounded-xl bg-violet-500 text-white font-bold hover:bg-violet-600 
                                 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                                 >
-                                    Next →
+                                    Next {`>`}
                                 </button>
                             </div>
                         </div>
@@ -203,8 +231,20 @@ const CreateGroupModal = ({ onClose }: Props) => {
                             </div>
 
                             <div className="px-4 py-4 border-t border-gray-800 flex gap-3">
-                                <button>
-                                    ← Back
+                                <button
+                                    onClick={() => setStep("details")}
+                                    className="flex-1 py-3 bg-[#24262a] rounded-xl text-gray-400 font-bold hover:text-white transition-colors"
+                                >
+                                    {`<`} Back
+                                </button>
+
+                                <button
+                                    onClick={handleCreate}
+                                    disabled={selected.length === 0 || isCreating}
+                                    className="flex-1 flex items-center justify-center py-3 bg-violet-500 rounded-xl text-white font-bold hover:bg-violet-600 transition-colors
+                                    disabled:opacity-40 disabled:cursor-not-allowed"
+                                >
+                                    {isCreating ? <Loader2 size={16} className="animate-spin" /> : "Create Group"}
                                 </button>
                             </div>
                         </>
