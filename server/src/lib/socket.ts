@@ -1,4 +1,4 @@
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { createServer } from "http";
 import express from "express";
 import { socketAuthMiddleware } from "../middleware/socket.middleware.js";
@@ -44,7 +44,7 @@ io.on("connection", async (socket) => {
     });
 });
 
-const joinUserRooms = async (socket: any, userId: string, username: string) => {
+const joinUserRooms = async (socket: Socket, userId: string, username: string) => {
     try {
         const [directChats, groups] = await Promise.all([
             prisma.directChat.findMany({
