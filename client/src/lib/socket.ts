@@ -11,7 +11,7 @@ let socket: Socket | null = null;
 
 export const connectSocket = (): Socket => {
     if (socket && socket.connected) return socket;
-
+    
     socket = io(SOCKET_URL, {
         withCredentials: true
     });

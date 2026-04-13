@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import axiosInstance from "../lib/axios";
 import type { User, Chat, Message } from "@/types/chat";
+import type { Socket } from "socket.io-client";
 
 interface ChatStore {
     chats: Chat[];
@@ -11,6 +12,7 @@ interface ChatStore {
     isSendingMessage: boolean;
     searchResults: User[];
     isSearching: boolean;
+    onlineUsers: string[];
 
     fetchChats: () => Promise<void>;
     fetchMessages: (chatId: string, chatType: string) => Promise<void>;
@@ -21,7 +23,9 @@ interface ChatStore {
 
     setActiveChat: (chat: Chat | null) => Promise<void>;
     clearMessages: () => void;
-    
+
+    initSocketListeners: (socket: Socket) => void;
+
 }
 
 
@@ -39,6 +43,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
     searchResults: [],
     isSearching: false,
+
+    onlineUsers: [],
 
     // functions
 
@@ -123,7 +129,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         try {
             const response = await axiosInstance.post("/user/search", { searchKey });
             set({ searchResults: response.data });
-        } catch(err: any) {
+        } catch (err: any) {
             console.error("User search failed: ", err);
             throw new Error(err.response?.data || err.message || "User search failed");
         } finally {
@@ -131,13 +137,54 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         }
     },
 
-    setActiveChat: async (chat) => { 
+    setActiveChat: async (chat) => {
         set({ activeChat: chat });
-        if ( chat ) {
+        if (chat) {
             await get().fetchMessages(chat.id, chat.type);
         }
     },
 
     clearMessages: () => { set({ messages: [] }) },
 
+    initSocketListeners: (socket: Socket) => {
+
+        socket.off("online_users");
+        socket.off("user_online");
+        socket.off("user_offline");
+        socket.off("receive_message");
+
+        socket.on("online_users", (userIds: string[]) => {
+            set({ onlineUsers: userIds });
+        });
+
+        socket.on("user_online", (userId: string) => {
+            set((prev) => ({
+                onlineUsers: [...new Set([...prev.onlineUsers, userId])]
+            }));
+        });
+
+        socket.on("user_offline", (userId: string) => {
+            set((prev) => ({
+                onlineUsers: prev.onlineUsers.filter((id) => id !== userId)
+            }));
+        });
+
+        socket.on("receive_message", (message: Message) => {
+            const { activeChat } = get();
+
+            const belongsToActiveChat = activeChat && (
+                message.directChatId === activeChat.id ||
+                message.groupId === activeChat.id ||
+                message.roomId === activeChat.id
+            );
+
+            if (belongsToActiveChat) {
+                set((prev) => ({
+                    messages: [...prev.messages, message]
+                }));
+            }
+
+            get().fetchChats();
+        })
+    }
 }));

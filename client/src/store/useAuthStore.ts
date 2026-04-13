@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import axiosInstance from "../lib/axios";
 import { authClient } from "@/lib/authClient";
+import { connectSocket, disconnectSocket } from "@/lib/socket";
+import { useChatStore } from "./useChatStore";
 
 export interface User {
     id: string;
@@ -36,6 +38,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     isSigningUp: false,
     isLoggingIn: false,
 
+
     setUser: (updatedUser: User) => {
         set({ user: updatedUser });
     },
@@ -44,8 +47,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         try {
             const response = await axiosInstance.get("/auth/check");
             set({ user: response.data })
-            console.log(get().user)
-
+            const socket = connectSocket();
+            useChatStore.getState().initSocketListeners(socket);
         } catch (err) {
             console.error("Auth check failed: ", err);
             set({ user: null });
@@ -59,7 +62,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         try {
             const response = await axiosInstance.post("/auth/signup", data);
             set({ user: response.data })
-            // console.log(get().user);    
+            // console.log(get().user); 
         } catch (err: any) {
             console.log("Signup failed: ", err.response?.data?.message || err.message);
             throw new Error(err.response?.data?.message || err?.message);
@@ -73,6 +76,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         try {
             const response = await axiosInstance.post("/auth/login", data);
             set({ user: response.data })
+            const socket = connectSocket();
+            useChatStore.getState().initSocketListeners(socket);    
+
         } catch (err: any) {
             set({ user: null });
             console.log("Login failed: ", err.response?.data?.message || err.message);
@@ -86,6 +92,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         try {
             await axiosInstance.post("/auth/logout");
             set({ user: null });
+            disconnectSocket();
         } catch (err: any) {
             console.log("Logout failed: ", err.response?.data?.message || err.message);
         }

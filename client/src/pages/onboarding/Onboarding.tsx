@@ -19,6 +19,8 @@ import {
     FileText,
     Sparkles,
 } from "lucide-react";
+import { connectSocket } from "@/lib/socket";
+import { useChatStore } from "@/store/useChatStore";
 
 
 const STEPS: readonly string[] = ["Welcome", "Account Setup", "Terms", "Get Started"];
@@ -29,8 +31,8 @@ const Onboarding = () => {
     const { user } = useAuthStore();
 
     useEffect(() => {
-        if (user?.image) setFormData((prev) => ({...prev, avatarPreview: user.image as string})) ;
-        if (user?.name) setFormData((prev) => ({...prev, fullName: user.name as string}))
+        if (user?.image) setFormData((prev) => ({ ...prev, avatarPreview: user.image as string }));
+        if (user?.name) setFormData((prev) => ({ ...prev, fullName: user.name as string }))
     }, [])
 
     const { completeOnboarding, checkUsername } = useUserStore();
@@ -65,6 +67,8 @@ const Onboarding = () => {
                 avatar: formData.avatar,
             });
             toast.success("Onboarding complete!");
+            const socket = connectSocket();
+            useChatStore.getState().initSocketListeners(socket);
             navigate("/");
         } catch (err: any) {
             toast.error(err.message || "Onboarding failed");

@@ -36,7 +36,10 @@ export interface Chat {
 export interface Message {
     id: string;
     content?: string | null;
-    senderId: string;
+    senderId: string;   
+    directChatId?: string;
+    groupId?: string;
+    roomId?: string;
     createdAt: string;
     updatedAt: string;
     sender: User;
