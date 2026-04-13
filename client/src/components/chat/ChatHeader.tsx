@@ -9,8 +9,10 @@ interface Props {
 
 const ChatHeader = ({ onBack }: Props) => {
 
-  const { activeChat } = useChatStore();
+  const { activeChat, onlineUsers } = useChatStore();
   if (!activeChat) return null;
+
+  const isOnline = activeChat.type === "direct" && !!activeChat.otherUserId && onlineUsers.includes(activeChat.otherUserId);
 
   return (
     <div className="flex items-center justify-between px-4 lg:px-5 py-4 border-b border-gray-800/50 bg-[#0d0e11] shrink-0">
@@ -38,11 +40,20 @@ const ChatHeader = ({ onBack }: Props) => {
         <div>
           <p className="font-bold text-white text-xs leading-tight">
             {activeChat.name ? activeChat.name : "?"}
-          </p> 
-          <p className="font-bold text-gray-500 text-xs leading-tight">
-            @{activeChat.username ? activeChat.username : "?"}
-          </p>  
+          </p>
+          {activeChat.type === "direct" &&
+            <p className="font-bold text-gray-500 text-xs leading-tight">
+              @{activeChat.username ? activeChat.username : "?"}
+            </p>
+          }
         </div>
+
+        {/* online/offline */}
+        { activeChat.type === "direct" &&
+          <span className={`text-xs ${isOnline ? "text-green-500" : "text-red-500"}`}>
+            {isOnline ? "online" : "offline"}
+          </span>
+        }
       </div>
 
       {/* actions -> call, video call, info */}
@@ -58,7 +69,7 @@ const ChatHeader = ({ onBack }: Props) => {
           <Info size={17} />
         </button>
       </div>
-    </div>
+    </div >
 
 
   )

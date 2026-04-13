@@ -26,6 +26,7 @@ export interface LastMessage {
 export interface Chat {
     id: string;
     type: "direct" | "group" | "room";
+    otherUserId?: string;
     name: string;
     username?: string | null;
     avatar?: string | null;
@@ -36,7 +37,10 @@ export interface Chat {
 export interface Message {
     id: string;
     content?: string | null;
-    senderId: string;
+    senderId: string;   
+    directChatId?: string;
+    groupId?: string;
+    roomId?: string;
     createdAt: string;
     updatedAt: string;
     sender: User;

@@ -9,17 +9,14 @@ import { auth } from "./lib/auth.js";
 import userRouter from "./routes/userRoutes.js";
 import chatRouter from "./routes/chatRoutes.js";
 import messageRouter from "./routes/messageRoutes.js";
+import { app, server } from "./lib/socket.js";
 
 
-// debugging
-import { readdirSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
 
-const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(helmet());
+
 const allowedOrigins = [
     "http://localhost:5173",
     "https://nod-seven.vercel.app",
@@ -36,9 +33,6 @@ app.use(cors({
     },
     credentials: true,
 }));
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-// console.log(process.env.NODE_ENV === "production")
 
 
 app.use(express.json({ limit: "50mb" }));
@@ -53,6 +47,6 @@ app.all('/api/auth/{*any}', toNodeHandler(auth));
 
 
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 })

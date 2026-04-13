@@ -94,6 +94,7 @@ export const getAllDirectChats = async (id: string) => {
             return {
                 id: chat.id,
                 type: "direct",
+                otherUserId: otherParticipant.id,
                 name: otherParticipant.name,
                 username: otherParticipant.username,
                 avatar: otherParticipant.avatar,
