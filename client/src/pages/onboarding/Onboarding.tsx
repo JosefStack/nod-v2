@@ -65,7 +65,7 @@ const Onboarding = () => {
                 fullName: formData.fullName,
                 bio: formData.bio,
                 avatar: formData.avatar,
-            });
+            }); 
             toast.success("Onboarding complete!");
             const socket = connectSocket();
             useChatStore.getState().initSocketListeners(socket);

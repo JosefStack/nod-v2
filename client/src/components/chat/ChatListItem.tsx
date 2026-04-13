@@ -1,3 +1,4 @@
+import { useChatStore } from "@/store/useChatStore";
 import type { Chat } from "@/types/chat";
 
 
@@ -7,14 +8,15 @@ const formatTime = (dateStr?: string | null) => {
     const date = new Date(dateStr);
     const now = new Date();
 
-    const diffDays = Math.floor((now.getTime() - date.getTime()) / 1000 * 60 * 60 * 24);
+    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
 
     if ((diffDays) === 0) return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     if ((diffDays) === 1) return "Yesterday";
-    if ((diffDays) < 7) return date.toLocaleTimeString([], { weekday: "short" });
+    if ((diffDays) < 7) return date.toLocaleDateString([], { weekday: "short" });
     return date.toLocaleTimeString([], { month: "short", day: "numeric" });
 
 }
+
 
 
 interface Props {
@@ -24,6 +26,9 @@ interface Props {
 }
 
 const ChatListItem = ({ chat, onSelectChat, isSelected }: Props) => {
+    const { onlineUsers } = useChatStore();
+    const isOnline = chat.type === "direct" && !!chat.otherUserId && onlineUsers.includes(chat.otherUserId);
+
     return (
         <button
             onClick={() => onSelectChat(chat)}
@@ -42,12 +47,19 @@ const ChatListItem = ({ chat, onSelectChat, isSelected }: Props) => {
             text-gray-400 font-bold overflow-hidden text-sm">
                     {
                         chat.avatar ?
-                            <img src={chat.avatar} alt={chat.name? chat.name : chat.username as string} className="w-full h-full object-cover" /> :
+                            <img src={chat.avatar} alt={chat.name ? chat.name : chat.username as string} className="w-full h-full object-cover" /> :
                             chat.type === "group" ?
                                 <span className="text-lg">👥</span> :
-                                <span>{chat.name? chat.name[0].toUpperCase() : "?"}</span>
+                                <span>{chat.name ? chat.name[0].toUpperCase() : "?"}</span>
                     }
                 </div>
+                {/* onlne/offline */}
+                {chat.type === "direct" && 
+                    <span
+                        className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[#0d0e11]
+                    ${isOnline ? "bg-green-500" : "bg-zinc-500"}`}
+                    />
+                }
             </div>
 
             {/* info */}
@@ -67,8 +79,8 @@ const ChatListItem = ({ chat, onSelectChat, isSelected }: Props) => {
                     <span className="text-xs text-gray-500 truncate">
                         {
                             chat.lastMessage?.sender && chat.type === "group" ?
-                                `${chat.lastMessage.sender}: ${chat.lastMessage.preview  || ""}` :
-                                chat.lastMessage?.preview || "No messages yet"  
+                                `${chat.lastMessage.sender}: ${chat.lastMessage.preview || ""}` :
+                                chat.lastMessage?.preview || "No messages yet"
                         }
                     </span>
                     {

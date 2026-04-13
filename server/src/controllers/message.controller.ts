@@ -2,6 +2,7 @@ import { Response } from "express";
 import { AuthRequest } from "../middleware/auth.middleware.js";
 import { prisma } from "../lib/prisma.js";
 import cloudinary from "../lib/cloudinary.js";
+import { io } from "../lib/socket.js";
 
 
 
@@ -164,6 +165,8 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
                 attachments: true
             }
         });
+
+        io.to(chatId).emit("receive_message", message);
 
         return res.status(201).json(message);
 
