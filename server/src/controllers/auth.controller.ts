@@ -19,10 +19,10 @@ const checkAuth = async (req: AuthRequest, res: Response) => {
                 where: { id: session.user.id },
                 select: { id: true, email: true, isOnboarded: true, username: true, avatar: true, bio: true, image: true, name: true },
             });
-            
+
             return res.status(200).json(user);
         }
-        
+
         return res.status(200).json(req.user || null);
     } catch (err) {
         console.error("Auth check error: ", err);
@@ -42,7 +42,7 @@ const signup = async (req: Request, res: Response) => {
             { where: { email } }
         );
         if (exists) return res.status(409).json({ message: "Email already in use" });
-        
+
 
 
         // hashing password
@@ -60,7 +60,7 @@ const signup = async (req: Request, res: Response) => {
         console.error(err);
         res.status(500).json({ message: "Internal server error" });
     }
-    
+
 
 
 }
@@ -75,19 +75,19 @@ const login = async (req: Request, res: Response) => {
 
         if (!input || !password) return res.status(400).json({ message: "All fields required" });
 
-        const isEmail = input.includes("@");    
+        const isEmail = input.includes("@");
 
         const user = await prisma.user.findFirst({
-            where: { [isEmail ? "email" : "username"] : input },
+            where: { [isEmail ? "email" : "username"]: input },
         });
-    
+
         if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
         const match = await bcrypt.compare(password, user.password);
         if (!match) return res.status(401).json({ message: "Invalid credentials" });
 
         delete user.password;
-        
+
         generateToken(user.id, res);
         return res.status(200).json(user);
 
@@ -95,14 +95,18 @@ const login = async (req: Request, res: Response) => {
         console.log(err);
         res.status(500).json({ message: "Internal server error" });
     }
-} 
+}
 
 
 
 
-const logout = async (req: Request, res: Response) => { 
+const logout = async (req: Request, res: Response) => {
     try {
-        res.clearCookie("jwt");
+        res.clearCookie("jwt", {
+            httpOnly: true,
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            secure: process.env.NODE_ENV === "production",
+        });
         return res.status(200).json({ message: "Logged out successfully" });
     }
     catch (err) {

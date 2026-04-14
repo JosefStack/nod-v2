@@ -13,12 +13,12 @@ export const generateToken = (userId: string, res: Response): string => {
     );
 
     res.cookie(
-        "jwt", 
+        "jwt",
         token,
         {
             maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
             httpOnly: true,
-            sameSite: "lax",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             secure: process.env.NODE_ENV === "production",
         }
     )
