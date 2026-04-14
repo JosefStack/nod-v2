@@ -38,7 +38,6 @@ export const useAuthStore = create<AuthStore>((set, _) => ({
     isSigningUp: false,
     isLoggingIn: false,
 
-
     setUser: (updatedUser: User) => {
         set({ user: updatedUser });
     },
@@ -46,7 +45,7 @@ export const useAuthStore = create<AuthStore>((set, _) => ({
     checkAuth: async () => {
         try {
             const response = await axiosInstance.get("/auth/check");
-            set({ user: response.data })
+            set({ user: response.data });
             const socket = connectSocket();
             useChatStore.getState().initSocketListeners(socket);
         } catch (err) {
@@ -61,8 +60,7 @@ export const useAuthStore = create<AuthStore>((set, _) => ({
         set({ isSigningUp: true });
         try {
             const response = await axiosInstance.post("/auth/signup", data);
-            set({ user: response.data })
-            // console.log(get().user); 
+            set({ user: response.data });
         } catch (err: any) {
             console.log("Signup failed: ", err.response?.data?.message || err.message);
             throw new Error(err.response?.data?.message || err?.message);
@@ -75,10 +73,9 @@ export const useAuthStore = create<AuthStore>((set, _) => ({
         set({ isLoggingIn: true });
         try {
             const response = await axiosInstance.post("/auth/login", data);
-            set({ user: response.data })
+            set({ user: response.data });
             const socket = connectSocket();
-            useChatStore.getState().initSocketListeners(socket);    
-
+            useChatStore.getState().initSocketListeners(socket);
         } catch (err: any) {
             set({ user: null });
             console.log("Login failed: ", err.response?.data?.message || err.message);
@@ -113,4 +110,3 @@ export const useAuthStore = create<AuthStore>((set, _) => ({
     },
 
 }))
-
