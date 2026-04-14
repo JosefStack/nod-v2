@@ -32,7 +32,7 @@ interface AuthStore {
     signInWithGithub: () => Promise<void>;
 };
 
-export const useAuthStore = create<AuthStore>((set, get) => ({
+export const useAuthStore = create<AuthStore>((set, _) => ({
     user: null,
     isCheckingAuth: true,
     isSigningUp: false,

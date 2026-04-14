@@ -7,9 +7,21 @@ import { prisma } from "./prisma.js";
 export const app = express();
 export const server = createServer(app);
 
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://nod-seven.vercel.app",
+]
+
 export const io = new Server(server, {
     cors: {
-        origin: process.env.CLIENT_URL || "http://localhost:5173",
+        origin: (origin, callback) => {
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                console.log("Blocked by CORS: ", origin);
+                callback(new Error("Not allowed by CORS"));
+            }
+        },
         credentials: true,
     },
 });
