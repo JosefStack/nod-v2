@@ -20,10 +20,17 @@ const checkAuth = async (req: AuthRequest, res: Response) => {
                 select: { id: true, email: true, isOnboarded: true, username: true, avatar: true, bio: true, image: true, name: true },
             });
 
-            return res.status(200).json(user);
+            if (!user) return res.status(200).json(null);
+            const token = generateToken(user.id, res);
+            return res.status(200).json({ ...user, token });
         }
 
-        return res.status(200).json(req.user || null);
+        if (req.user) {
+            const token = generateToken(req.user.id, res);
+            return res.status(200).json({ ...req.user, token });
+        }
+
+        return res.status(200).json(null);
     } catch (err) {
         console.error("Auth check error: ", err);
         return res.status(500).json({ message: "Internal server error" });
@@ -88,8 +95,8 @@ const login = async (req: Request, res: Response) => {
 
         delete user.password;
 
-        generateToken(user.id, res);
-        return res.status(200).json(user);
+        const token = generateToken(user.id, res);
+        return res.status(200).json({ ...user, token });
 
     } catch (err) {
         console.log(err);
@@ -104,7 +111,7 @@ const logout = async (req: Request, res: Response) => {
     try {
         res.clearCookie("jwt", {
             httpOnly: true,
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            sameSite: "lax",
             secure: process.env.NODE_ENV === "production",
         });
         return res.status(200).json({ message: "Logged out successfully" });
