@@ -7,6 +7,9 @@ const getToken = () =>  document.cookie
     .find(row => row.startsWith("jwt="))
     ?.split("=")[1];
 
+// getToken() returns undefined cs the cookies are httpOnly (httpOnly: true) , so js cant read it
+// doing httpOnly: false would make the app vulnerable to XSS attacks
+
 console.log(document.cookie);
 
 const SOCKET_URL = import.meta.env.MODE === "production"
@@ -22,7 +25,9 @@ export const connectSocket = (): Socket => {
 
     socket = io(SOCKET_URL, {
         withCredentials: true,
-        auth: { token: getToken() }
+        auth: { token: getToken() }, // wont work
+        transports: ['websockets'],
+
     });
 
     return socket;

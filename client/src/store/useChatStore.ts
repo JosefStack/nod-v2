@@ -2,6 +2,7 @@ import { create } from "zustand";
 import axiosInstance from "../lib/axios";
 import type { User, Chat, Message } from "@/types/chat";
 import type { Socket } from "socket.io-client";
+import { useAuthStore } from "./useAuthStore";
 
 interface ChatStore {
     chats: Chat[];
@@ -171,6 +172,11 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
         socket.on("receive_message", (message: Message) => {
             const { activeChat } = get();
+
+            if (message.senderId === useAuthStore.getState().user?.id) {
+                get().fetchChats();
+                return;
+            }
 
             const belongsToActiveChat = activeChat && (
                 message.directChatId === activeChat.id ||
