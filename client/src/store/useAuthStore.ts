@@ -45,8 +45,9 @@ export const useAuthStore = create<AuthStore>((set, _) => ({
     checkAuth: async () => {
         try {
             const response = await axiosInstance.get("/auth/check");
-            set({ user: response.data });
-            const socket = connectSocket();
+            const { token, ...user } = response.data ?? {};
+            set({ user: response.data ? user : null });
+            const socket = connectSocket(token);
             useChatStore.getState().initSocketListeners(socket);
         } catch (err) {
             console.error("Auth check failed: ", err);
@@ -73,8 +74,9 @@ export const useAuthStore = create<AuthStore>((set, _) => ({
         set({ isLoggingIn: true });
         try {
             const response = await axiosInstance.post("/auth/login", data);
-            set({ user: response.data });
-            const socket = connectSocket();
+            const { token, ...user } = response.data;
+            set({ user });
+            const socket = connectSocket(token);
             useChatStore.getState().initSocketListeners(socket);
         } catch (err: any) {
             set({ user: null });
