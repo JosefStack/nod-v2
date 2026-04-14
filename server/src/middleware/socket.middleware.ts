@@ -16,7 +16,7 @@ export const socketAuthMiddleware = async (socket: Socket, next: (err?: Error) =
         // console.log("===========");
         // console.log(socket.handshake.auth?.token);
         // console.log("+++++++++++");
-        console.log(socket.handshake);
+        // console.log(socket.handshake);
 
 
 
