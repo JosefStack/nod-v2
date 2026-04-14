@@ -12,6 +12,14 @@ export const socketAuthMiddleware = async (socket: Socket, next: (err?: Error) =
                 .find((row) => row.startsWith("jwt="))
                 ?.split("=")[1];
 
+        // console.log(token);
+        // console.log("===========");
+        // console.log(socket.handshake.auth?.token);
+        // console.log("+++++++++++");
+        console.log(socket.handshake);
+
+
+
         if (!token) {
             console.log("Socket rejected: no token");
             return next(new Error("Unauthorized"));

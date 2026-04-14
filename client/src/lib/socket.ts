@@ -7,6 +7,7 @@ const getToken = () =>  document.cookie
     .find(row => row.startsWith("jwt="))
     ?.split("=")[1];
 
+console.log(document.cookie);
 
 const SOCKET_URL = import.meta.env.MODE === "production"
     ? import.meta.env.VITE_API_URL?.replace("/api", "") || ""
