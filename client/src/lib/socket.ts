@@ -26,7 +26,7 @@ export const connectSocket = (): Socket => {
     socket = io(SOCKET_URL, {
         withCredentials: true,
         auth: { token: getToken() }, // wont work
-        transports: ['websockets'],
+        transports: ['websocket'],
 
     });
 
