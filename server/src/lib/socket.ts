@@ -49,6 +49,45 @@ io.on("connection", async (socket) => {
     io.emit("user_online", user.id);
     socket.emit("online_users", Array.from(userSocketMap.keys()));
 
+    socket.on("call_user", ({ targetUserId, offer }: { targetUserId: string; offer: RTCSessionDescriptionInit }) => {
+        const targetSocketId = getReceiverSocketId(targetUserId);
+        if (!targetSocketId) {
+            socket.emit("call_failed", { reason: "User is offline" });
+            return;
+        };
+
+        io.to(targetSocketId).emit("incoming_call", {
+            callerId: user.id,
+            callerName: user.name || user.username,
+            callerAvatar: user.avatar,
+            offer,
+        });
+    });
+
+    socket.on("call_accepted", ({ targetUserId, answer }: { targetUserId: string; answer: RTCSessionDescriptionInit }) => {
+        const targetSocketId = getReceiverSocketId(targetUserId);
+        if (!targetSocketId) return;
+        io.to(targetSocketId).emit("call_accepted", { answer });
+    })
+
+    socket.on("call_rejected", ({ targetUserId }: { targetUserId: string }) => {
+        const targetSocketId = getReceiverSocketId(targetUserId);
+        if (!targetSocketId) return;
+        io.to(targetSocketId).emit("call_rejected");
+    });
+
+    socket.on("ice_candidate", ({ targetUserId, candidate }: { targetUserId: string; candidate: RTCIceCandidateInit }) => {
+        const targetSocketId = getReceiverSocketId(targetUserId);
+        if (!targetSocketId) return;
+        io.to(targetSocketId).emit("ice_candidate", { candidate });
+    });
+
+    socket.on("call_ended", ({ targetUserId }: { targetUserId: string }) => {
+        const targetSocketId = getReceiverSocketId(targetUserId);
+        if (!targetSocketId) return;
+        io.to(targetSocketId).emit("call_ended");
+    });
+
     socket.on("disconnect", () => {
         console.log(`User disconnected: ${user.username}`);
         userSocketMap.delete(user.id);
