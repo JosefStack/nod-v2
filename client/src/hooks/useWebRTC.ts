@@ -1,7 +1,6 @@
 import { getSocket } from "@/lib/socket";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 
 
 
@@ -27,7 +26,7 @@ interface IncomingCallData {
 const useWebRTC = () => {
 
     const socket = getSocket();
-    const { user } = useAuthStore();
+
 
 
     const [callState, setCallState] = useState<CallState>("idle");
