@@ -287,6 +287,23 @@ const useWebRTC = () => {
         }
 
     }, [socket, cleanup]);
+
+
+    return {
+        callState,
+        incomingCall,
+        isMuted,
+        isCameraOff,
+        localVideoRef,
+        remoteVideoRef,
+        startCall,
+        acceptCall,
+        rejectCall,
+        endCall,
+        toggleMute,
+        toggleCamera,
+    };
+
 };
 
 
