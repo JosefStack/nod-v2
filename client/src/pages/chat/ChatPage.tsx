@@ -1,6 +1,9 @@
+import CallWindow from "@/components/call/CallWindow";
+import IncomingCall from "@/components/call/IncomingCall";
 import ChatWindow from "@/components/chat/ChatWindow";
 import RoomWindow from "@/components/chat/RoomWindow";
 import Sidebar from "@/components/chat/Sidebar";
+import useWebRTC from "@/hooks/useWebRTC";
 // import { useAuthStore } from "@/store/useAuthStore"
 import { useChatStore } from "@/store/useChatStore"
 import type { Chat } from "@/types/chat";
@@ -12,10 +15,12 @@ type Tab = "chats" | "rooms"
 const ChatPage = () => {
 
     // const { user } = useAuthStore();
-    const { fetchChats, setActiveChat, activeChat,  } = useChatStore();
+    const { fetchChats, setActiveChat, activeChat, } = useChatStore();
     // const { message } = useChatStore();
     const [activeTab, setActiveTab] = useState<Tab>("chats");
     const [isMobileChatOpen, setIsMobileChatOpen] = useState<boolean>(false);
+
+    const webRTC = useWebRTC();
 
     useEffect(() => {
         fetchChats();
@@ -58,7 +63,7 @@ const ChatPage = () => {
                 flex-col flex-1 min-w-0
             `}>
                 {activeTab === "chats" && activeChat ? (
-                    <ChatWindow onBack={handleBack}/>
+                    <ChatWindow onBack={handleBack} webRTC={webRTC} />
                 ) : activeTab === "rooms" ? (
                     <RoomWindow />
                 ) :
@@ -73,6 +78,10 @@ const ChatPage = () => {
                     )
                 }
             </div>
+
+
+            <IncomingCall />
+            <CallWindow />
 
         </div >
     )

@@ -43,6 +43,9 @@ const useWebRTC = () => {
 
 
     const cleanup = useCallback(() => {
+
+        console.log("cleanup() triggered");
+
         localStreamRef.current?.getTracks().forEach(track => track.stop());
         localStreamRef.current = null;
 
@@ -62,6 +65,9 @@ const useWebRTC = () => {
     }, [])
 
     const getLocalStream = useCallback(async () => {
+        
+        console.log("getLocalStream() triggered");
+
         const stream = await navigator.mediaDevices.getUserMedia({
             audio: true,
             video: true,
@@ -79,6 +85,9 @@ const useWebRTC = () => {
 
 
     const createPeerConnection = useCallback((targetUserId: string) => {
+
+        console.log("createPeerConnection() triggered");
+
         const pc = new RTCPeerConnection(ICE_SERVERS);
 
         pc.onicecandidate = (event) => {
@@ -117,6 +126,8 @@ const useWebRTC = () => {
 
 
     const addLocalTracks = useCallback((pc: RTCPeerConnection, stream: MediaStream) => {
+        console.log("addLocalTracks() triggered...");
+
         stream.getTracks().forEach(track => {
             pc.addTrack(track, stream);
         })
@@ -124,6 +135,8 @@ const useWebRTC = () => {
 
 
     const startCall = useCallback(async (targetUserId: string) => {
+        
+        console.log("startCall() triggered");
 
         if (!socket) return;
 
@@ -153,6 +166,8 @@ const useWebRTC = () => {
 
 
     const acceptCall = useCallback(async () => {
+
+        console.log("acceptCall() triggered...");
 
         if (!socket || !incomingCall) return;
 
@@ -189,6 +204,8 @@ const useWebRTC = () => {
 
     const rejectCall = useCallback(() => {
 
+        console.log("rejectCall() triggered");
+
         if (!socket || !incomingCall) return;
 
         socket.emit("call_rejected", {
@@ -201,6 +218,7 @@ const useWebRTC = () => {
 
 
     const endCall = useCallback(() => {
+        console.log("endCall() triggered");
 
         if (!socket || !activeCallUserId) return;
 
@@ -214,6 +232,7 @@ const useWebRTC = () => {
 
 
     const toggleMute = useCallback(() => {
+        console.log("toggleMute() triggered...");
 
         if (!localStreamRef.current) return;
         localStreamRef.current.getAudioTracks().forEach(track => {
@@ -226,6 +245,7 @@ const useWebRTC = () => {
 
 
     const toggleCamera = useCallback(() => {
+        console.log("toggleCamera() triggered...");
 
         if (!localStreamRef.current) return;
         localStreamRef.current.getVideoTracks().forEach(track => {

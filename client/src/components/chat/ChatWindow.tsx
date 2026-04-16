@@ -4,9 +4,11 @@ import ChatHeader from "./ChatHeader";
 import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
 import MessagesSkeleton from "./MessageSkeleton";
+import type useWebRTC from "@/hooks/useWebRTC";
 
 interface Props {
     onBack: () => void;
+    webRTC: ReturnType<typeof useWebRTC>;
 }
 
 const shouldShowDateLabel = (messages: any[], idx: number) => {
@@ -16,9 +18,16 @@ const shouldShowDateLabel = (messages: any[], idx: number) => {
     return curr !== prev;
 };
 
-const ChatWindow = ({ onBack }: Props) => {
-    const { messages, isLoadingMessages } = useChatStore();
+const ChatWindow = ({ onBack, webRTC }: Props) => {
+    const { messages, isLoadingMessages, activeChat } = useChatStore();
     const bottomRef = useRef<HTMLDivElement>(null);
+
+
+    const handleCall = () => {
+        if (!activeChat?.otherUserId) return;
+        webRTC.startCall(activeChat.otherUserId);
+    }
+
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -26,7 +35,7 @@ const ChatWindow = ({ onBack }: Props) => {
 
     return (
         <div className="flex flex-col h-full">
-            <ChatHeader onBack={onBack} />
+            <ChatHeader onBack={onBack} onCall={handleCall} />
 
             {/* MESSAGES AREA */}
             <div className="flex-1 overflow-y-auto px-4 lg:px-5 py-2">
