@@ -1,6 +1,7 @@
 import { getSocket } from "@/lib/socket";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 
 
@@ -172,12 +173,16 @@ const useWebRTC = () => {
         if (!socket || !incomingCall) return;
 
         try {
+            
             setCallState("connected");
             setActiveCallUserId(incomingCall.callerId);
+
+            
 
             const stream = await getLocalStream();
 
             const pc = createPeerConnection(incomingCall.callerId);
+
 
             addLocalTracks(pc, stream);
 
@@ -195,7 +200,7 @@ const useWebRTC = () => {
             })
 
         } catch (err) {
-            console.error("Faile to accept call: ", err);
+            console.error("Failed to accept call: ", err);
             cleanup();
         };
 

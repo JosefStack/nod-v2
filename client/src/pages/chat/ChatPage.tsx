@@ -22,6 +22,7 @@ const ChatPage = () => {
 
     const webRTC = useWebRTC();
 
+
     useEffect(() => {
         fetchChats();
     }, []);
@@ -80,8 +81,8 @@ const ChatPage = () => {
             </div>
 
 
-            <IncomingCall />
-            <CallWindow />
+            <IncomingCall webRTC={webRTC} />
+            <CallWindow webRTC={webRTC}/>
 
         </div >
     )
