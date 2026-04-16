@@ -5,9 +5,10 @@ import { ArrowLeft, Info, Phone, Video } from "lucide-react";
 
 interface Props {
   onBack: () => void;
+  onCall: () => void;
 }
 
-const ChatHeader = ({ onBack }: Props) => {
+const ChatHeader = ({ onBack, onCall }: Props) => {
 
   const { activeChat, onlineUsers } = useChatStore();
   if (!activeChat) return null;
@@ -49,7 +50,7 @@ const ChatHeader = ({ onBack }: Props) => {
         </div>
 
         {/* online/offline */}
-        { activeChat.type === "direct" &&
+        {activeChat.type === "direct" &&
           <span className={`text-xs ${isOnline ? "text-green-500" : "text-red-500"}`}>
             {isOnline ? "online" : "offline"}
           </span>
@@ -62,9 +63,12 @@ const ChatHeader = ({ onBack }: Props) => {
         <button className="p-2.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-xl transition-all">
           <Phone size={17} />
         </button>
-        <button className="p-2.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-xl transition-all">
+        <button
+          onClick={onCall}
+          className="p-2.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-xl transition-all">
           <Video size={17} />
         </button>
+
         <button className="p-2.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-xl transition-all">
           <Info size={17} />
         </button>
