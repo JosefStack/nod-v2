@@ -13,7 +13,7 @@ const ICE_SERVERS = {
 };
 
 
-export type CallState = "idle" | "connected" | "calling" | "failed";
+export type CallState = "idle" | "connected" | "calling" | "failed" | "incoming";
 
 interface IncomingCallData {
     callerId: string;
@@ -201,7 +201,7 @@ const useWebRTC = () => {
 
 
     const endCall = useCallback(() => {
-        
+
         if (!socket || !activeCallUserId) return;
 
         socket.emit("call_ended", {
@@ -219,14 +219,14 @@ const useWebRTC = () => {
         localStreamRef.current.getAudioTracks().forEach(track => {
             track.enabled = !track.enabled;
         });
-        
+
         setIsMuted(prev => !prev);
 
     }, []);
 
 
     const toggleCamera = useCallback(() => {
-        
+
         if (!localStreamRef.current) return;
         localStreamRef.current.getVideoTracks().forEach(track => {
             track.enabled = !track.enabled;
@@ -237,15 +237,56 @@ const useWebRTC = () => {
     }, []);
 
 
-    
-    // socket event listeners
+
+    // socket event listeners, add listeners again if socket changes. 
 
     useEffect(() => {
 
-    });
+        if (!socket) return;
 
+        socket.on("incoming_call", (data: IncomingCallData) => {
+            setIncomingCall(data);
+            setCallState("incoming");
+        });
 
+        socket.on("call_accepted", async ({ answer }: { answer: RTCSessionDescription }) => {
+            if (!pcRef.current) return;
+            await pcRef.current.setRemoteDescription(new RTCSessionDescription(answer));
+        });
 
+        socket.on("call_rejected", () => {
+            cleanup();
+        });
+
+        socket.on("call_ended", () => {
+            cleanup();
+        });
+
+        socket.on("ice_candidate", async ({ candidate }) => {
+            if (!pcRef.current) return;
+            try {
+                pcRef.current.addIceCandidate(new RTCIceCandidate(candidate))
+            } catch (err) {
+                console.error("Failed to add ICE candidate: ", err);
+            }
+        });
+
+        socket.on("call_failed", ({ reason }) => {
+            console.error("Call failed: ", reason);
+            cleanup();
+        }
+        );
+
+        return () => {
+            socket.off("incoming_call");
+            socket.off("call_accepted");
+            socket.off("call_rejected");
+            socket.off("call_ended");
+            socket.off("ice_candidate");
+            socket.off("call_failed");
+        }
+
+    }, [socket, cleanup]);
 };
 
 
