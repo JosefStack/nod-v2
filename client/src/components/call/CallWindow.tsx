@@ -31,13 +31,13 @@ const CallWindow = ({ webRTC }: Props) => {
 
             <div className="flex-1 relative">
 
-                {callState === "connected" && <video
+                <video
                     ref={remoteVideoRef}
                     autoPlay
                     playsInline
                     className="w-full h-full object-cover"
                 />
-                }
+                
 
 
                 {callState === "calling" && (
