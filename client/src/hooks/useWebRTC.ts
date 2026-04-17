@@ -147,11 +147,11 @@ const useWebRTC = () => {
                 setCallState("connected");
             };
 
-            if (pc.connectionState === "failed" ||
-                pc.connectionState === "closed"
-            ) {
-                cleanup();
-            }
+            // if (pc.connectionState === "failed" ||
+            //     pc.connectionState === "closed"
+            // ) {
+            //     cleanup();
+            // }
         };
 
         pcRef.current = pc;
