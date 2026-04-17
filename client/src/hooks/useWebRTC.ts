@@ -340,11 +340,15 @@ const useWebRTC = () => {
 
         socket.on("ice_candidate", async ({ candidate }) => {
             if (!pcRef.current) {
+                console.log("buffering candidate:", candidate.type);
+
                 pendingCandidatesRef.current.push(candidate);
                 return;
             };
             try {
                 pcRef.current.addIceCandidate(new RTCIceCandidate(candidate))
+                console.log("added candidate:", candidate.type);
+
             } catch (err) {
                 console.error("Failed to add ICE candidate: ", err);
             }
