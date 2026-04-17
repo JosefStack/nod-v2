@@ -1,6 +1,6 @@
 import { useAuthStore } from "@/store/useAuthStore";
 import type { Chat } from "@/types/chat";
-import { HelpCircle, LogOut, MessageSquarePlus, Settings, Users } from "lucide-react";
+import { LogOut, MessageSquarePlus, Settings, Users } from "lucide-react";
 import { useState } from "react";
 
 // for in development features
@@ -80,9 +80,9 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
                         </HoverCard>
 
 
-                        <button 
-                        onClick={logout}
-                        className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg transition-colors">
+                        <button
+                            onClick={logout}
+                            className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg transition-colors">
                             <LogOut size={15} />
                         </button>
 
