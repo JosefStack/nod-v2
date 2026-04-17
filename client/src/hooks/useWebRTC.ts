@@ -79,10 +79,10 @@ const useWebRTC = () => {
     }, [])
 
     const getLocalStream = useCallback(async () => {
-        
+
         console.log("getLocalStream() triggered");
 
-        
+
 
         const stream = await navigator.mediaDevices.getUserMedia({
             audio: true,
@@ -108,16 +108,27 @@ const useWebRTC = () => {
 
         pc.onicecandidate = (event) => {
             if (event.candidate) {
+                console.log("ICE candidate found:", event.candidate.type);
+
                 socket?.emit("ice_candidate", {
                     targetUserId,
                     candidate: event.candidate
                 })
+            } else {
+                console.log("ICE gathering complete");
+
             };
         };
 
         pc.ontrack = (event) => {
+            console.log("ontrack fired!", event.streams);
+
             if (remoteVideoRef.current) {
                 remoteVideoRef.current.srcObject = event.streams[0];
+                console.log("remote stream set");
+
+            } else {
+                console.log("ontrack fired!", event.streams);
             };
         };
 
@@ -151,7 +162,7 @@ const useWebRTC = () => {
 
 
     const startCall = useCallback(async (targetUserId: string) => {
-        
+
         console.log("startCall() triggered");
 
         if (!socket) return;
@@ -188,7 +199,7 @@ const useWebRTC = () => {
         if (!socket || !incomingCall) return;
 
         try {
-            
+
             setCallState("connected");
             setActiveCallUserId(incomingCall.callerId);
 
@@ -216,7 +227,7 @@ const useWebRTC = () => {
         } catch (err) {
             console.error("Failed to accept call: ", err);
             cleanup();
-        };  
+        };
 
     }, [socket, cleanup, createPeerConnection, addLocalTracks, getLocalStream, incomingCall]);
 
