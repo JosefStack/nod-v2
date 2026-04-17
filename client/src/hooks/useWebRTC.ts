@@ -55,10 +55,15 @@ const useWebRTC = () => {
     const localVideoRef = useRef<HTMLVideoElement | null>(null);
     const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
 
+    const pendingCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
+
+
 
     const cleanup = useCallback(() => {
 
         console.log("cleanup() triggered");
+
+        pendingCandidatesRef.current = []
 
         localStreamRef.current?.getTracks().forEach(track => track.stop());
         localStreamRef.current = null;
@@ -139,13 +144,12 @@ const useWebRTC = () => {
                 setCallState("connected");
             };
 
-            if (pc.connectionState === "disconnected" ||
-                pc.connectionState === "failed" ||
+            if (pc.connectionState === "failed" ||
                 pc.connectionState === "closed"
             ) {
                 cleanup();
             }
-        }
+        };
 
         pcRef.current = pc;
         return pc;
@@ -214,6 +218,16 @@ const useWebRTC = () => {
             await pc.setRemoteDescription(
                 new RTCSessionDescription(incomingCall.offer)
             );
+
+            for (const candidate of pendingCandidatesRef.current) {
+                try {
+                    await pc.addIceCandidate(new RTCIceCandidate(candidate));
+                    console.log("Added buffered candidate");
+                } catch (err) {
+                    console.error("Failed to add buffered candidate:", err);
+                }
+            }
+            pendingCandidatesRef.current = [];
 
             const answer = await pc.createAnswer();
 
@@ -302,6 +316,15 @@ const useWebRTC = () => {
         socket.on("call_accepted", async ({ answer }: { answer: RTCSessionDescription }) => {
             if (!pcRef.current) return;
             await pcRef.current.setRemoteDescription(new RTCSessionDescription(answer));
+
+            for (const candidate of pendingCandidatesRef.current) {
+                try {
+                    await pcRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+                } catch (err) {
+                    console.error("Failed to add buffered candidate:", err);
+                }
+            }
+            pendingCandidatesRef.current = []
         });
 
         socket.on("call_rejected", () => {
@@ -313,7 +336,10 @@ const useWebRTC = () => {
         });
 
         socket.on("ice_candidate", async ({ candidate }) => {
-            if (!pcRef.current) return;
+            if (!pcRef.current) {
+                pendingCandidatesRef.current.push(candidate);
+                return;
+            };
             try {
                 pcRef.current.addIceCandidate(new RTCIceCandidate(candidate))
             } catch (err) {
