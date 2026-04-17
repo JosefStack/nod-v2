@@ -1,6 +1,6 @@
 import { useAuthStore } from "@/store/useAuthStore";
 import type { Chat } from "@/types/chat";
-import { HelpCircle, MessageSquarePlus, Settings, Users } from "lucide-react";
+import { HelpCircle, LogOut, MessageSquarePlus, Settings, Users } from "lucide-react";
 import { useState } from "react";
 
 // for in development features
@@ -23,7 +23,7 @@ interface Props {
 
 const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
 
-    const { user } = useAuthStore();
+    const { user, logout } = useAuthStore();
     // const [showUserSearch, setShowUserSearch] = useState<boolean>(false);
     // const [showCreateGroup, setShowCreateGroup] = useState<boolean>(false);
     const [search, setSearch] = useState("")
@@ -40,7 +40,7 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
                 />
             }
 
-            { showCreateGroup &&
+            {showCreateGroup &&
                 <CreateGroupModal
                     onSelectChat={onSelectChat}
                     onClose={() => setShowCreateGroup(false)}
@@ -79,14 +79,13 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
                             <HoverCardContent side={"bottom"} className="w-40 h-10 flex items-center justify-center bg-[#272727] text-white">In development!</HoverCardContent>
                         </HoverCard>
 
-                        <HoverCard>
-                            <HoverCardTrigger>
-                                <button className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg transition-colors">
-                                    <HelpCircle size={15} />
-                                </button>
-                            </HoverCardTrigger>
-                            <HoverCardContent side={"bottom"} className="w-40 h-10 flex items-center justify-center bg-[#282828] text-white">In development!</HoverCardContent>
-                        </HoverCard>
+
+                        <button 
+                        onClick={logout}
+                        className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg transition-colors">
+                            <LogOut size={15} />
+                        </button>
+
                     </div>
                 </div>
             </div>
