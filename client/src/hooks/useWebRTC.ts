@@ -133,7 +133,7 @@ const useWebRTC = () => {
                 console.log("remote stream set");
 
             } else {
-                console.log("ontrack fired!", event.streams);
+                console.log("remoteVideoRef is null");
             };
         };
 
