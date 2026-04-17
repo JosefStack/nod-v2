@@ -67,6 +67,8 @@ const useWebRTC = () => {
         
         console.log("getLocalStream() triggered");
 
+        
+
         const stream = await navigator.mediaDevices.getUserMedia({
             audio: true,
             video: true,
@@ -175,7 +177,6 @@ const useWebRTC = () => {
             setCallState("connected");
             setActiveCallUserId(incomingCall.callerId);
 
-            
 
             const stream = await getLocalStream();
 
@@ -200,9 +201,9 @@ const useWebRTC = () => {
         } catch (err) {
             console.error("Failed to accept call: ", err);
             cleanup();
-        };
+        };  
 
-    }, [socket, cleanup, createPeerConnection, addLocalTracks, getLocalStream]);
+    }, [socket, cleanup, createPeerConnection, addLocalTracks, getLocalStream, incomingCall]);
 
 
     const rejectCall = useCallback(() => {
