@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { Toaster } from "sonner";
 import Onboarding from "./pages/onboarding/Onboarding";
 import ChatPage from "./pages/chat/ChatPage";
-import { Spinner } from "@/components/ui/spinner";
+import { HeartWave } from "@/components/loader/HeartWave";
 
 
 const App = () => {
@@ -17,12 +17,7 @@ const App = () => {
     checkAuth();
   }, []);
 
-  if (isCheckingAuth) {
-    return <div className="fixed inset-0 z-50 flex items-center justify-center gap-1 bg-black">
-        <Spinner className="size-6 text-white"/>
-        <span className="text-white">Loading</span>
-    </div>
-  };
+  if (isCheckingAuth) return <HeartWave />;
 
   return (
 
