@@ -131,6 +131,10 @@ const useWebRTC = () => {
             if (remoteVideoRef.current) {
                 remoteVideoRef.current.srcObject = event.streams[0];
                 console.log("remote stream set");
+                
+                console.log("video element:", remoteVideoRef.current);
+                console.log("stream tracks:", event.streams[0].getTracks());
+                remoteVideoRef.current.play().catch(e => console.error("play failed:", e));
 
             } else {
                 console.log("remoteVideoRef is null");
