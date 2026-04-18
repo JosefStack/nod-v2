@@ -85,8 +85,6 @@ export function World({ data, globeConfig }: { data: Position[]; globeConfig: Gl
       autoRotate = true,
       autoRotateSpeed = 0.5,
       arcTime = 2000,
-      arcLength = 0.9,
-      maxRings = 3,
     } = globeConfig;
 
     const W = mount.clientWidth || 600;
@@ -139,123 +137,146 @@ export function World({ data, globeConfig }: { data: Position[]; globeConfig: Gl
       ));
     }
 
-    // Land dots: fetch TopoJSON, build polygon rings, sample a lat/lng grid with point-in-polygon
-    fetch("https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json")
-      .then((r) => r.json())
-      .then(({ objects, arcs: topoArcs, transform }: any) => {
-        if (!isMounted) return;
+    // Land dots: try local GeoJSON first, fall back to CDN TopoJSON.
+    const loadLand = async () => {
+      try {
+        const r = await fetch("/countries.json");
+        if (!r.ok) throw new Error("no local file");
+        const geojson = await r.json();
+        return { type: "geojson" as const, data: geojson };
+      } catch {
+        const r = await fetch("https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json");
+        const topo = await r.json();
+        return { type: "topojson" as const, data: topo };
+      }
+    };
 
+    loadLand().then((result) => {
+      if (!isMounted) return;
+
+      type Ring = [number, number][];
+      type Poly = { exterior: Ring; holes: Ring[]; bb: { minLng: number; maxLng: number; minLat: number; maxLat: number } };
+      const polygons: Poly[] = [];
+
+      const addPolygon = (rings: Ring[]) => {
+        if (!rings.length) return;
+        const exterior = rings[0];
+        const holes = rings.slice(1);
+        let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
+        for (const [lng, lat] of exterior) {
+          if (lng < minLng) minLng = lng;
+          if (lng > maxLng) maxLng = lng;
+          if (lat < minLat) minLat = lat;
+          if (lat > maxLat) maxLat = lat;
+        }
+        polygons.push({ exterior, holes, bb: { minLng, maxLng, minLat, maxLat } });
+      };
+
+      if (result.type === "geojson") {
+        // GeoJSON: coordinates are plain [lng, lat], no decoding needed
+        for (const feature of result.data.features ?? []) {
+          const { type, coordinates } = feature.geometry;
+          if (type === "Polygon") addPolygon(coordinates as Ring[]);
+          else if (type === "MultiPolygon") for (const poly of coordinates) addPolygon(poly as Ring[]);
+        }
+      } else {
+        // TopoJSON: decode delta-quantized arcs into [lng, lat] positions
+        const { objects, arcs: topoArcs, transform } = result.data;
         const scale: [number, number] = transform?.scale ?? [1, 1];
         const translate: [number, number] = transform?.translate ?? [0, 0];
 
-        function decodeArc(arcIdx: number): [number, number][] {
-          const raw: number[][] = arcIdx >= 0
-            ? topoArcs[arcIdx]
-            : [...topoArcs[~arcIdx]].reverse();
+        const decodeArc = (arcIdx: number): Ring => {
+          const raw: number[][] = topoArcs[arcIdx >= 0 ? arcIdx : ~arcIdx];
           let x = 0, y = 0;
-          return raw.map(([dx, dy]) => {
+          const pts = raw.map(([dx, dy]) => {
             x += dx; y += dy;
             return [x * scale[0] + translate[0], y * scale[1] + translate[1]] as [number, number];
           });
-        }
-
-        type Poly = {
-          exterior: [number, number][];
-          holes: [number, number][][];
-          bb: { minLng: number; maxLng: number; minLat: number; maxLat: number };
+          return arcIdx < 0 ? pts.reverse() : pts;
         };
-        const polygons: Poly[] = [];
 
-        const buildPolygon = (arcGroups: number[][]) => {
+        const buildTopoPolygon = (arcGroups: number[][]) => {
           if (!arcGroups.length) return;
-          const exterior: [number, number][] = [];
-          for (const idx of arcGroups[0]) exterior.push(...decodeArc(idx));
-
-          const holes: [number, number][][] = [];
-          for (let h = 1; h < arcGroups.length; h++) {
-            const hole: [number, number][] = [];
-            for (const idx of arcGroups[h]) hole.push(...decodeArc(idx));
-            holes.push(hole);
-          }
-
-          let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
-          for (const [lng, lat] of exterior) {
-            if (lng < minLng) minLng = lng;
-            if (lng > maxLng) maxLng = lng;
-            if (lat < minLat) minLat = lat;
-            if (lat > maxLat) maxLat = lat;
-          }
-          polygons.push({ exterior, holes, bb: { minLng, maxLng, minLat, maxLat } });
+          const rings: Ring[] = arcGroups.map((group) => {
+            const ring: Ring = [];
+            for (const idx of group) ring.push(...decodeArc(idx));
+            return ring;
+          });
+          addPolygon(rings);
         };
 
         for (const geom of objects.countries.geometries) {
-          if (geom.type === "Polygon") {
-            buildPolygon(geom.arcs);
-          } else if (geom.type === "MultiPolygon") {
-            for (const polyArcs of geom.arcs) buildPolygon(polyArcs);
-          }
+          if (geom.type === "Polygon") buildTopoPolygon(geom.arcs);
+          else if (geom.type === "MultiPolygon") for (const p of geom.arcs) buildTopoPolygon(p);
         }
+      }
 
-        // Sample every STEP degrees; reject quickly via bounding box, then full PIP
-        const STEP = 2.5;
-        const landPositions: number[] = [];
+      // Grid-sample every STEP degrees; bounding-box pre-filter then full PIP
+      const STEP = 2;
+      const landPositions: number[] = [];
 
-        for (let lat = -88; lat <= 88; lat += STEP) {
-          for (let lng = -180; lng <= 180; lng += STEP) {
-            const pt: [number, number] = [lng, lat];
-            for (const poly of polygons) {
-              if (lng < poly.bb.minLng || lng > poly.bb.maxLng ||
-                  lat < poly.bb.minLat || lat > poly.bb.maxLat) continue;
-              if (!pointInRing(pt, poly.exterior)) continue;
-              let inHole = false;
-              for (const hole of poly.holes) {
-                if (pointInRing(pt, hole)) { inHole = true; break; }
-              }
-              if (!inHole) {
-                const v = latLngToVec3(lat, lng, R + 0.5);
-                landPositions.push(v.x, v.y, v.z);
-                break;
-              }
+      for (let lat = -88; lat <= 88; lat += STEP) {
+        for (let lng = -180; lng <= 180; lng += STEP) {
+          const pt: [number, number] = [lng, lat];
+          for (const poly of polygons) {
+            if (lng < poly.bb.minLng || lng > poly.bb.maxLng ||
+                lat < poly.bb.minLat || lat > poly.bb.maxLat) continue;
+            if (!pointInRing(pt, poly.exterior)) continue;
+            let inHole = false;
+            for (const hole of poly.holes) {
+              if (pointInRing(pt, hole)) { inHole = true; break; }
+            }
+            if (!inHole) {
+              const v = latLngToVec3(lat, lng, R + 0.5);
+              landPositions.push(v.x, v.y, v.z);
+              break;
             }
           }
         }
+      }
 
-        if (!isMounted) return;
-        const geo = new THREE.BufferGeometry();
-        geo.setAttribute("position", new THREE.Float32BufferAttribute(landPositions, 3));
-        group.add(new THREE.Points(geo, new THREE.PointsMaterial({
-          color: new THREE.Color("#a8d4f0"),
-          size: 1.4,
-          transparent: true,
-          opacity: 0.6,
-          sizeAttenuation: true,
-        })));
-      })
-      .catch(() => {});
+      if (!isMounted) return;
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.Float32BufferAttribute(landPositions, 3));
+      group.add(new THREE.Points(geo, new THREE.PointsMaterial({
+        color: new THREE.Color("#a8d4f0"),
+        size: 1.4,
+        transparent: true,
+        opacity: 0.6,
+        sizeAttenuation: true,
+      })));
+    }).catch(() => {});
 
-    // City discs at arc endpoints
-    const discMat = new THREE.MeshBasicMaterial({
-      color: new THREE.Color("#06b6d4"),
-      transparent: true,
-      opacity: 0.9,
-      side: THREE.DoubleSide,
-    });
+    // Collect unique endpoints (both start and end of every arc) with their color
+    const endpointMap = new Map<string, { lat: number; lng: number; color: string }>();
     data.forEach((arc) => {
-      const pos = latLngToVec3(arc.endLat, arc.endLng, R + 1.5);
-      const disc = new THREE.Mesh(new THREE.CircleGeometry(2.2, 16), discMat);
+      const sk = `${arc.startLat.toFixed(4)},${arc.startLng.toFixed(4)}`;
+      const ek = `${arc.endLat.toFixed(4)},${arc.endLng.toFixed(4)}`;
+      if (!endpointMap.has(sk)) endpointMap.set(sk, { lat: arc.startLat, lng: arc.startLng, color: arc.color });
+      if (!endpointMap.has(ek)) endpointMap.set(ek, { lat: arc.endLat, lng: arc.endLng, color: arc.color });
+    });
+    const endpoints = Array.from(endpointMap.values());
+
+    // Colored disc at every unique endpoint
+    endpoints.forEach(({ lat, lng, color }) => {
+      const pos = latLngToVec3(lat, lng, R + 1.5);
+      const disc = new THREE.Mesh(
+        new THREE.CircleGeometry(2.2, 16),
+        new THREE.MeshBasicMaterial({ color: safeColor(color), transparent: true, opacity: 0.9, side: THREE.DoubleSide })
+      );
       disc.position.copy(pos);
       disc.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), pos.clone().normalize());
       group.add(disc);
     });
 
-    // Animated arcs
+    // Animated arcs — drawn from startLat/Lng to endLat/Lng (both are pulsing points)
     const ARC_SEGMENTS = 90;
     type ArcEntry = { line: THREE.Line; startMs: number; order: number };
     const arcEntries: ArcEntry[] = [];
 
     data.forEach((arc) => {
-      const s = latLngToVec3(arc.startLat, arc.startLng, R);
-      const e = latLngToVec3(arc.endLat, arc.endLng, R);
+      const s = latLngToVec3(arc.startLat, arc.startLng, R + 1.5);
+      const e = latLngToVec3(arc.endLat, arc.endLng, R + 1.5);
       const ctrl = s.clone().add(e).normalize().multiplyScalar(R + arc.arcAlt * R * 0.85);
       const pts = new THREE.QuadraticBezierCurve3(s, ctrl, e).getPoints(ARC_SEGMENTS);
       const geo = new THREE.BufferGeometry().setFromPoints(pts);
@@ -268,18 +289,16 @@ export function World({ data, globeConfig }: { data: Position[]; globeConfig: Gl
       arcEntries.push({ line, startMs: Date.now() + arc.order * 350, order: arc.order });
     });
 
-    // Expanding rings at endpoints
-    const ringPalette = ["#06b6d4", "#3b82f6", "#6366f1"];
+    // Expanding rings at every unique endpoint, using that endpoint's color
     const RING_LIFE = 2500;
     const RING_MAX = 9;
-    const ringCount = Math.min(maxRings * 4, data.length);
 
-    const rings = data.slice(0, ringCount).map((arc, i) => {
-      const pos = latLngToVec3(arc.endLat, arc.endLng, R + 0.4);
+    const rings = endpoints.map(({ lat, lng, color }, i) => {
+      const pos = latLngToVec3(lat, lng, R + 1.5);
       const mesh = new THREE.Mesh(
         new THREE.RingGeometry(0.5, 1.1, 32),
         new THREE.MeshBasicMaterial({
-          color: safeColor(ringPalette[i % ringPalette.length]),
+          color: safeColor(color),
           transparent: true,
           side: THREE.DoubleSide,
           depthWrite: false,
@@ -288,7 +307,7 @@ export function World({ data, globeConfig }: { data: Position[]; globeConfig: Gl
       mesh.position.copy(pos);
       mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), pos.clone().normalize());
       group.add(mesh);
-      return { mesh, startMs: Date.now() + i * (RING_LIFE / (ringCount || 1)) };
+      return { mesh, startMs: Date.now() + i * (RING_LIFE / (endpoints.length || 1)) };
     });
 
     let raf: number;
@@ -302,10 +321,11 @@ export function World({ data, globeConfig }: { data: Position[]; globeConfig: Gl
         const elapsed = now - entry.startMs;
         if (elapsed <= 0) { entry.line.geometry.setDrawRange(0, 0); continue; }
         const t = elapsed / arcTime;
+        // ARC_SEGMENTS + 1 = total points; draw all of them so arc reaches both endpoint discs
         if (t < 1) {
-          entry.line.geometry.setDrawRange(0, Math.max(2, Math.floor(t * arcLength * ARC_SEGMENTS)));
+          entry.line.geometry.setDrawRange(0, Math.max(2, Math.floor(t * (ARC_SEGMENTS + 1))));
         } else if (t < 2) {
-          entry.line.geometry.setDrawRange(0, Math.floor(arcLength * ARC_SEGMENTS));
+          entry.line.geometry.setDrawRange(0, ARC_SEGMENTS + 1);
         } else {
           entry.startMs = now + entry.order * 350;
           entry.line.geometry.setDrawRange(0, 0);

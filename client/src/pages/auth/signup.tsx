@@ -81,7 +81,7 @@ const Signup = () => {
             />
 
             {/* Right — form */}
-            <div className="flex flex-1 flex-col justify-center px-10 bg-[#0f0f0f] overflow-y-auto">
+            <div className="flex flex-1 flex-col justify-center px-10 overflow-y-auto" style={{ background: "#0d0d14" }}>
                 <div className="mx-auto w-full max-w-md py-10">
                     <h2 className="text-4xl font-bold text-white">Create Account</h2>
                     <p className="mt-2 text-gray-400">Join Nod. Start your journey today.</p>

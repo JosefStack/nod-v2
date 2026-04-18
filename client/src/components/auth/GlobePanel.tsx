@@ -56,11 +56,25 @@ interface GlobePanelProps {
 
 export function GlobePanel({ heading, subtext }: GlobePanelProps) {
   return (
-    <div className="relative hidden lg:flex flex-col w-[60%] bg-black overflow-hidden">
+    <div className="relative hidden lg:flex flex-col w-[60%] overflow-hidden" style={{ background: "#0d0d14" }}>
+      {/* Globe canvas */}
       <div className="absolute inset-0">
         <World data={sampleArcs} globeConfig={globeConfig} />
       </div>
-      <div className="absolute bottom-10 left-10 right-10 z-10">
+
+      {/* Radial vignette — fades sphere edges into background */}
+      <div
+        className="absolute inset-0 pointer-events-none z-10"
+        style={{ background: "radial-gradient(ellipse at 50% 50%, transparent 38%, #0d0d14 72%)" }}
+      />
+
+      {/* Right-edge fade — matches form panel bg so seam disappears */}
+      <div
+        className="absolute inset-y-0 right-0 w-52 pointer-events-none z-10"
+        style={{ background: "linear-gradient(to right, transparent, #0d0d14)" }}
+      />
+
+      <div className="absolute bottom-10 left-10 right-10 z-20">
         <h1 className="text-5xl font-bold text-white leading-tight">{heading}</h1>
         <p className="mt-4 text-gray-300 text-lg max-w-lg">{subtext}</p>
       </div>
