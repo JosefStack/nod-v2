@@ -30,7 +30,7 @@ export const auth = betterAuth({
     },
     trustedOrigins: [
         process.env.NODE_ENV === "production"
-            ? process.env.CLIENT_URL   // only prod frontend
+            ? process.env.CLIENT_URL   
             : "http://localhost:5173",
         process.env.NODE_ENV === "production"
             ? process.env.BETTER_AUTH_URL
