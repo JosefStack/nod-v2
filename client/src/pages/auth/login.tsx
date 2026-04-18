@@ -65,7 +65,7 @@ const Login = () => {
         <div className="flex h-screen w-screen overflow-hidden">
 
             <GlobePanel
-                heading={<>Welcome <span className="text-pink-400">Back</span> to the Sanctuary.</>}
+                heading={<>Welcome <span className="text-pink-400">Back</span> to Nod.</>}
                 subtext="The night awaits. Pick up where you left off."
             />
 

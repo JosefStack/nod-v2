@@ -14,7 +14,7 @@ const TermsStep = ({ onNext, onBack }: { onNext: () => void; onBack: () => void 
 
             <div className="bg-[#121316] rounded-2xl p-6 h-64 overflow-y-auto mb-8 text-gray-400 text-sm leading-relaxed space-y-4 border border-gray-800">
                 <p className="font-bold text-white">1. Acceptance of Terms</p>
-                <p>By accessing Neon Nocturne, you agree to be bound by these terms and conditions.</p>
+                <p>By accessing Nod, you agree to be bound by these terms and conditions.</p>
                 <p className="font-bold text-white">2. User Conduct</p>
                 <p>You agree not to use the platform for any unlawful purposes or to transmit any harmful, offensive, or disruptive content.</p>
                 <p className="font-bold text-white">3. Privacy</p>

@@ -45,7 +45,7 @@ const FeaturesStep = ({
                     disabled={isSubmitting}
                     className="px-12 py-4 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white font-bold text-lg shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 transition-all disabled:opacity-40"
                 >
-                    {isSubmitting ? "Setting up..." : "Enter the Nocturne →"}
+                    {isSubmitting ? "Setting up..." : "Enter Nod →"}
                 </button>
             </div>
         </div>
