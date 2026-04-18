@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/useAuthStore";
 import { toast } from "sonner";
-import loginImage from "@/assets/signup.png";
+import { GlobePanel } from "@/components/auth/GlobePanel";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -64,24 +64,10 @@ const Login = () => {
     return (
         <div className="flex h-screen w-screen overflow-hidden">
 
-            {/* LEFT SIDE — image */}
-            <div className="relative hidden lg:flex w-[60%]">
-                <img
-                    src={loginImage}
-                    alt="login"
-                    className="h-full w-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/40" />
-                <div className="absolute bottom-10 left-10 right-10">
-                    <p className="text-2xl font-bold text-cyan-400">{/* Name Placeholder */}</p>
-                    <h1 className="mt-4 text-5xl font-bold text-white leading-tight">
-                        Welcome <span className="text-pink-400">Back</span> to the Sanctuary.
-                    </h1>
-                    <p className="mt-4 text-gray-300 text-lg max-w-lg">
-                        The night awaits. Pick up where you left off.
-                    </p>
-                </div>
-            </div>
+            <GlobePanel
+                heading={<>Welcome <span className="text-pink-400">Back</span> to the Sanctuary.</>}
+                subtext="The night awaits. Pick up where you left off."
+            />
 
             {/* RIGHT SIDE — form */}
             <div className="flex flex-1 flex-col justify-center px-10 bg-[#0f0f0f] overflow-y-auto">

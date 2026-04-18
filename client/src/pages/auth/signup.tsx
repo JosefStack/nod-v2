@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/useAuthStore";
 import { toast } from "sonner";
-import signupImage from "@/assets/signup.png";
+import { GlobePanel } from "@/components/auth/GlobePanel";
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -75,24 +75,10 @@ const Signup = () => {
 
     return (
         <div className="flex h-screen w-screen overflow-hidden">
-            {/* Left — image */}
-            <div className="relative hidden lg:flex w-[60%]">
-                <img
-                    src={signupImage}
-                    alt="signup"
-                    className="h-full w-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/40" />
-                <div className="absolute bottom-10 left-10 right-10">
-                    {/* <p className="text-2xl font-bold text-cyan-400">Nod</p> */}
-                    <h1 className="mt-4 text-5xl font-bold text-white leading-tight">
-                        Enter the <span className="text-pink-400">Sanctuary</span> of Digital Connection.
-                    </h1>
-                    <p className="mt-4 text-gray-300 text-lg max-w-lg">
-                        Engineered for privacy, styled for the night. Join the global network where every message is a masterpiece of clarity and security.
-                    </p>
-                </div>
-            </div>
+            <GlobePanel
+                heading={<>Enter the <span className="text-pink-400">Sanctuary</span> of Digital Connection.</>}
+                subtext="Engineered for privacy, styled for the night. Join the global network where every message is a masterpiece of clarity and security."
+            />
 
             {/* Right — form */}
             <div className="flex flex-1 flex-col justify-center px-10 bg-[#0f0f0f] overflow-y-auto">
