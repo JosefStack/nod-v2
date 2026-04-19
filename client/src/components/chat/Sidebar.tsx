@@ -85,7 +85,7 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
 
                         <button
                             onClick={logout}
-                            className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg transition-colors">
+                            className="p-2 text-red-600 hover:text-white hover:bg-gray-800 rounded-lg transition-colors">
                             <LogOut size={15} />
                         </button>
 
