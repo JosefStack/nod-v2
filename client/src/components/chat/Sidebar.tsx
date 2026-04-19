@@ -163,7 +163,7 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
                 <div className="flex-1 overflow-y-auto">
                     <ChatList search={search} onSelectChat={onSelectChat} />
                 </div>
-                : <div className="flex justify-center items-center text-xs font-bold text-gray-500">
+                : <div className="flex-1 flex justify-center items-center text-xs font-bold text-gray-500">
                     IN PROGRESS
                 </div>
                 } 
