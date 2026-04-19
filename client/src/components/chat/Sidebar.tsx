@@ -12,7 +12,7 @@ import {
 import ChatList from "./ChatList";
 import UserSearchModal from "../modals/UserSearchModal";
 import CreateGroupModal from "../modals/CreateGroupModal";
-import { div } from "three/src/nodes/math/OperatorNode.js";
+
 
 
 type Tab = "rooms" | "chats";
