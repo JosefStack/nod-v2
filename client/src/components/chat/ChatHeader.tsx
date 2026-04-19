@@ -60,9 +60,9 @@ const ChatHeader = ({ onBack, onCall }: Props) => {
       {/* actions -> call, video call, info */}
 
       <div className="flex items-center gap-1">
-        <button className="p-2.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-xl transition-all">
+        {/* <button className="p-2.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-xl transition-all">
           <Phone size={17} />
-        </button>
+        </button> */}
         <button
           onClick={onCall}
           className="p-2.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-xl transition-all">
