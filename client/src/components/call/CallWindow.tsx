@@ -41,7 +41,7 @@ const CallWindow = ({ webRTC }: Props) => {
 
 
                 {callState === "calling" && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0d0e11]">
+                    <div className="absolute z-50 inset-0 flex flex-col items-center justify-center bg-[#0d0e11]">
                         <div className="w-24 h-24 rounded-full bg-[#24262a] flex items-center justify-center text-4xl font-bold text-white 
                     overflow-hidden mb-4 ">
                             {activeChat?.avatar
@@ -66,7 +66,7 @@ const CallWindow = ({ webRTC }: Props) => {
             </div>
 
             {/* controls */}
-            <div className="flex items-center justify-center gap-6 py-6 bg-[#121316]">
+            <div className="flex absolute bottom-0 items-center z-50 justify-center gap-6 py-6 bg-[#121316]">
                 <button
                     onClick={toggleMute}
                     className={`w-12 h-12 rounded-full flex items-center justify-center transition-all
