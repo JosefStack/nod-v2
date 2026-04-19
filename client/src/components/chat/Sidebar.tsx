@@ -31,11 +31,7 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
     const [showUserSearch, setShowUserSearch] = useState(false);
     const [showCreateGroup, setShowCreateGroup] = useState(false);
 
-    if (activeTab === "rooms") return (
-        <div className="flex items-center justify-center">
-            coming soon
-        </div>
-    )
+
 
     return (
         <div className="flex flex-col h-full bg-[#0d0e11]">
@@ -161,9 +157,16 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
 
 
             {/* chats list */}
-            <div className="flex-1 overflow-y-auto">
-                <ChatList search={search} onSelectChat={onSelectChat} />
-            </div>
+
+            {
+            activeTab === "chats" ?
+                <div className="flex-1 overflow-y-auto">
+                    <ChatList search={search} onSelectChat={onSelectChat} />
+                </div>
+                : <div className="flex justify-center items-center text-xs font-bold text-gray-500">
+                    IN PROGRESS
+                </div>
+                } 
 
         </div>
 

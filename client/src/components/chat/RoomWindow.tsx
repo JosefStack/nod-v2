@@ -2,8 +2,8 @@
 
 const RoomWindow = () => {
     return (
-        <div className="h-full w-full flex items-center justify-center text-white">
-            In development, meanwhile you could try out this game
+        <div className="h-full w-full flex items-center justify-center text-gray-500 text-xs font-bold ">
+            COMING SOON!
         </div>
     )
 }
