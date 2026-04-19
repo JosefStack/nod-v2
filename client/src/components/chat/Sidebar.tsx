@@ -12,6 +12,7 @@ import {
 import ChatList from "./ChatList";
 import UserSearchModal from "../modals/UserSearchModal";
 import CreateGroupModal from "../modals/CreateGroupModal";
+import { div } from "three/src/nodes/math/OperatorNode.js";
 
 
 type Tab = "rooms" | "chats";
@@ -29,6 +30,12 @@ const Sidebar = ({ activeTab, setActiveTab, onSelectChat }: Props) => {
     const [search, setSearch] = useState("")
     const [showUserSearch, setShowUserSearch] = useState(false);
     const [showCreateGroup, setShowCreateGroup] = useState(false);
+
+    if (activeTab === "rooms") return (
+        <div className="flex items-center justify-center">
+            coming soon
+        </div>
+    )
 
     return (
         <div className="flex flex-col h-full bg-[#0d0e11]">
