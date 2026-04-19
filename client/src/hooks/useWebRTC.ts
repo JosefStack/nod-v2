@@ -48,12 +48,12 @@ const useWebRTC = () => {
     const [activeCallUserId, setActiveCallUserId] = useState<string | null>(null);
     const [isMuted, setIsMuted] = useState<boolean>(false);
     const [isCameraOff, setIsCameraOff] = useState<boolean>(false);
+    const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+    const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
 
 
     const pcRef = useRef<RTCPeerConnection | null>(null);
     const localStreamRef = useRef<MediaStream | null>(null);
-    const localVideoRef = useRef<HTMLVideoElement | null>(null);
-    const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
 
     const pendingCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
 
@@ -71,10 +71,8 @@ const useWebRTC = () => {
         pcRef.current?.close();
         pcRef.current = null;
 
-        if (localVideoRef.current) localVideoRef.current.srcObject = null;
-        if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
-
-
+        setLocalStream(null);
+        setRemoteStream(null);
         setCallState("idle");
         setActiveCallUserId(null);
         setIncomingCall(null);
@@ -96,10 +94,7 @@ const useWebRTC = () => {
 
 
         localStreamRef.current = stream;
-
-        if (localVideoRef.current) {
-            localVideoRef.current.srcObject = stream;
-        }
+        setLocalStream(stream);
 
         return stream;
     }, []);
@@ -127,17 +122,7 @@ const useWebRTC = () => {
 
         pc.ontrack = (event) => {
             console.log("ontrack fired!", event.streams);
-
-            if (remoteVideoRef.current) {
-                remoteVideoRef.current.srcObject = event.streams[0];
-                console.log("remote stream set");
-
-                console.log("track enabled:", event.streams[0].getTracks().map(t => t.enabled));
-                console.log("track readyState:", event.streams[0].getTracks().map(t => t.readyState));
-
-            } else {
-                console.log("remoteVideoRef is null");
-            };
+            setRemoteStream(event.streams[0]);
         };
 
         pc.onconnectionstatechange = () => {
@@ -377,8 +362,8 @@ const useWebRTC = () => {
         incomingCall,
         isMuted,
         isCameraOff,
-        localVideoRef,
-        remoteVideoRef,
+        localStream,
+        remoteStream,
         startCall,
         acceptCall,
         rejectCall,

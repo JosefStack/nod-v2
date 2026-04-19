@@ -1,6 +1,7 @@
 import useWebRTC from "@/hooks/useWebRTC"
 import { useChatStore } from "@/store/useChatStore"
 import { Mic, MicOff, PhoneOff, Video, VideoOff } from "lucide-react"
+import { useEffect, useRef } from "react"
 
 
 
@@ -18,11 +19,26 @@ const CallWindow = ({ webRTC }: Props) => {
         isCameraOff,
         toggleMute,
         toggleCamera,
-        localVideoRef,
-        remoteVideoRef
+        localStream,
+        remoteStream,
     } = webRTC
 
     const { activeChat } = useChatStore();
+
+    const localVideoRef = useRef<HTMLVideoElement>(null);
+    const remoteVideoRef = useRef<HTMLVideoElement>(null);
+
+    useEffect(() => {
+        if (localVideoRef.current) {
+            localVideoRef.current.srcObject = localStream;
+        }
+    }, [localStream]);
+
+    useEffect(() => {
+        if (remoteVideoRef.current) {
+            remoteVideoRef.current.srcObject = remoteStream;
+        }
+    }, [remoteStream]);
 
     if (callState === "idle" || callState === "incoming") return null;
 
@@ -66,7 +82,7 @@ const CallWindow = ({ webRTC }: Props) => {
             </div>
 
             {/* controls */}
-            <div className="flex absolute bottom-0 items-center z-50 justify-center gap-6 py-6 bg-[#121316]">
+            <div className="flex shrink-0 items-center justify-center gap-6 py-6 bg-[#121316]">
                 <button
                     onClick={toggleMute}
                     className={`w-12 h-12 rounded-full flex items-center justify-center transition-all
