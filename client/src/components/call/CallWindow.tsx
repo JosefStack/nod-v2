@@ -45,7 +45,7 @@ const CallWindow = ({ webRTC }: Props) => {
     return (
         <div className="fixed inset-0 z-40 bg-[#0d0e11] flex flex-col">
 
-            <div className="flex-1 relative">
+            <div className="flex-1 min-h-0 relative">
 
                 <video
                     ref={remoteVideoRef}
