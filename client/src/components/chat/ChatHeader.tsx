@@ -1,5 +1,5 @@
 import { useChatStore } from "@/store/useChatStore";
-import { ArrowLeft, Info, Phone, Video } from "lucide-react";
+import { ArrowLeft, Info, Video } from "lucide-react";
 
 
 
