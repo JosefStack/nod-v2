@@ -1,3 +1,5 @@
+doc
+
 ================================================================================
   GOOGLE OAUTH FLOW: WHAT BROKE, WHY IT BROKE, AND HOW WE FIXED IT
   A deep, honest explanation — written so a 10-year-old can follow along
