@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 const MessageInput = () => {
 
+
     const { activeChat, sendMessage, isSendingMessage } = useChatStore();
     const [message, setMessage] = useState("");
     const [attachments, setAttachments] = useState<{ data: string; type: string; filename: string; size: number; preview: string }[]>([])
