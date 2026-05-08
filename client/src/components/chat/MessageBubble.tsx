@@ -135,7 +135,7 @@ const MessageBubble = ({ message, showDateLabel }: Props) => {
         {/* avatar - only for other user */}
         {!isMe && (
           <div className="w-8 h-8 rounded-full bg-[#24262a] flex items-center justify-center 
-  text-gray-400 text-xs font-bold shirnk-0 overflow-hidden">
+  text-gray-400 text-xs font-bold shrink-0 overflow-hidden">
             {message.sender.avatar
               ? <img src={message.sender.avatar} alt={message.sender.username} className="w-full h-full object-cover" />
               : message.sender.username?.[0]?.toUpperCase()
