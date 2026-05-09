@@ -6,6 +6,59 @@ from pgvector.asyncpg import register_vector
 
 groq = AsyncGroq(api_key=settings.GROQ_API_KEY)
 
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "search_messages", 
+            "description": """
+
+            """,
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query" : {
+                        "type": "string",
+                        "description": ""
+                    }, 
+                    "username": {
+                        "type": "string"
+                    }
+                },
+                "required": ["query"]
+            }
+        }
+    }, 
+
+    {
+        "type": "function",
+        "function": {
+            "name": "summarize_conversation",
+            "description": """
+            
+            """,
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "description": ""
+                    }, 
+                    "start_date": {
+                        "type": "string",
+                        "description": ""
+                    }, 
+                    "end_date": {
+                        "type": "string",
+                        "description": ""
+                    }
+                },
+                "required": ["username"]
+            }
+        }
+    }
+
+]
 
 async def fetch_chat_id(user_id: str, username: str, conn):
     chat = await conn.fetchrow(
@@ -104,3 +157,7 @@ async def summarize_conversation(user_id: str, username: str, start_date: str | 
 
         messages = await conn.fetch(query, *params)
         return [dict(row) for row in messages]
+
+
+async def handle_chat():
+    pass
