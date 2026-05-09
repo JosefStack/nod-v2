@@ -12,17 +12,24 @@ tools = [
         "function": {
             "name": "search_messages", 
             "description": """
+            Search through messages semantically. Use when user asks if they every said something or if they every said something to someone specific (based on username). 
+            Examples: 
+            1) If the user asks, did i ever talk about pets with @patrick? In this explanation @patrick is the user name, and the tool takes patrick (without the @) as the parameter. 
+            2) If the user asks, did i ever talk about pets with anyone? In this explanation query will be about pets, and username is not necessary (do not call the tool with username). 
 
+            If the user mentions a name without an @, ask the user to specify the correct username with an @. While calling the function, call without @ in the username.
+            If the user's question is not clear, or does not provide a clear hint regarding the parameters, ask the user to clarify. 
             """,
             "parameters": {
                 "type": "object",
                 "properties": {
                     "query" : {
                         "type": "string",
-                        "description": ""
+                        "description": "The search query."
                     }, 
                     "username": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Optional. The username of the person to scope the search to. Do not include @ in the string."
                     }
                 },
                 "required": ["query"]
@@ -35,22 +42,31 @@ tools = [
         "function": {
             "name": "summarize_conversation",
             "description": """
-            
+            Summarize the conversation with a specific person or summarize the conversation with a specific person on a given date range.
+            Use when user asks to summarize a conversation or what was discussed with someone particular. 
+            Optionally, the conversation can be filtered by a start_date and end_date if the user asks so. 
+            Example:
+            1) Summarize my conversation with @patrick. @patrick is the username, use patrick for function calling. 
+            2) Summarize my conversation with @partick from 2nd of May 2026. Start date is mentioned, call function with username and start date in ISO format e.g. 2026-05-02
+            3) Summarize my conversation with @patrick till 2nd of May 2025. Replace start_date with end_date. 
+            4) Summarize my conversation with @patrick from 1st January 2026 to 3rd Feb 2026. Include both start_date and end_date.
+
+            If the user's question is not clear, or does not provide a clear hint regarding the parameters, ask the user to clarify. 
             """,
             "parameters": {
                 "type": "object",
                 "properties": {
                     "username": {
                         "type": "string",
-                        "description": ""
+                        "description": "The username of the person whose conversation to summarize. Do not include @ in the string."
                     }, 
                     "start_date": {
                         "type": "string",
-                        "description": ""
+                        "description": "Optional. Start date in ISO format e.g. 2026-01-01"
                     }, 
                     "end_date": {
                         "type": "string",
-                        "description": ""
+                        "description": "Optional. End date in ISO format e.g. 2026-01-31"
                     }
                 },
                 "required": ["username"]
