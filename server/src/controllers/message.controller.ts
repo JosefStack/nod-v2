@@ -166,6 +166,17 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
             }
         });
 
+        
+        // ai microservice - embed new message
+        fetch(`${process.env.AI_SERVICE_URL}/embed`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json" },
+            body: JSON.stringify({
+                message_id: message.id,
+                content: message.content
+            })
+        }).catch(err => console.error("Embedding failed: ", err))
+
         io.to(chatId).emit("receive_message", message);
 
         return res.status(201).json(message);
