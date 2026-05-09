@@ -183,7 +183,6 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         user_id: userId,
-                        chat_id: chatId,
                         message: content,
                     })
                 })
