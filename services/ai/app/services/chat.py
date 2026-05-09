@@ -76,6 +76,7 @@ tools = [
 
 ]
 
+
 async def fetch_chat_id(user_id: str, username: str, conn):
     chat = await conn.fetchrow(
                 """
@@ -175,5 +176,66 @@ async def summarize_conversation(user_id: str, username: str, start_date: str | 
         return [dict(row) for row in messages]
 
 
-async def handle_chat():
-    pass
+available_functions = {
+    "search_messages": search_messages,
+    "summarize_conversation": summarize_conversation
+}
+
+# tc -> tool call
+async def execute_tool_call(tc, user_id, pool, messages):
+    function_name = tc.function.name
+    function_to_call = available_functions[function_name]
+    function_args = json.loads(tc.function.arguments)
+    if function_name in available_functions:
+        result = await function_to_call(user_id=user_id, pool=pool, **function_args,)
+        messages.append({
+            "role": "tool",
+            "tool_call_id": tc.id,
+            "name": function_name,
+            "content": json.dumps(result, default=str)
+        })
+    else: 
+        messages.append({
+            "role": "tool",
+            "tool_call_id": tc.id,
+            "name": function_name,
+            "content": "No available function to execute."
+        })
+
+async def handle_chat(user_id: str, message: str, pool):
+    messages = [
+        {
+            "role": "system",
+            "content": """
+                You are Nod Bot, a helpful assistant built into the Nod chat app.
+                You can search through the user's messages and summarize conversations.
+                Always refer to users by their @username. 
+                If a user asks you to summarize a conversation with somone, or asks you to search your messages with someone specific, make sure the user is providing the username in @username format. 
+                If not, ask the user to clarify and provide the correct username in @username format. 
+                When calling tools, do not include @ in the username, only use the username text (excluding @). 
+            """
+        }, 
+        {
+            "role": "user",
+            "content": message
+        }
+    ]
+
+    while True:
+        response = await groq.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=messages,
+            tools=tools,
+        )
+
+        choice = response.choices[0]
+
+        if choice.finish_reason == "tool_calls":
+            messages.append(choice.message)
+
+            for tc in choice.message.tool_calls:
+                await execute_tool_call(tc, user_id, pool, messages)
+
+        else:
+            return choice.message.content
+    
