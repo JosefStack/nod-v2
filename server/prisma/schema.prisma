@@ -177,7 +177,7 @@ model Message {
   group        Group?        @relation(fields: [groupId], references: [id])
   room         Room?         @relation(fields: [roomId], references: [id])
   sender       User          @relation(fields: [senderId], references: [id])
-
+  embedding  Unsupported("vector(1024)")?
   @@map("messages")
 }
 
