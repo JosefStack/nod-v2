@@ -15,7 +15,8 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(embed_router)
 app.include_router(chat_router)
 
-@app.get("/health")
+@app.get("/health", include_in_schema=False)
+@app.head("/health", include_in_schema=False)
 def health():
     return { "status": "ok" }
 
