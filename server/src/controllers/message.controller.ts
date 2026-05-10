@@ -5,8 +5,6 @@ import cloudinary from "../lib/cloudinary.js";
 import { io } from "../lib/socket.js";
 
 
-
-
 export const getAllMessages = async (req: AuthRequest, res: Response) => {
 
     try {
@@ -148,6 +146,8 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
 
         if (!chatRelation) return res.status(400).json({ message: "Invalid chat type" });
 
+
+
         //  content, attachments, chatType, chatId
         const message = await prisma.message.create({
             data: {
@@ -166,49 +166,6 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
             }
         });
 
-        // bot response 
-        if (chatType === "direct") {
-            const chat = await prisma.directChat.findFirst({
-                where: {
-                    id: chatId,
-                    participants: {
-                        some: { userId: process.env.BOT_USER_ID }
-                    }
-                }
-            });
-
-            if (chat) {
-                const aiResponse = await fetch(`${process.env.AI_SERVICE_URL}/chat`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        user_id: userId,
-                        message: content,
-                    })
-                })
-
-                const data = await aiResponse.json();
-
-                const botMessage = await prisma.message.create({
-                    data: {
-                        content: data.reply,
-                        senderId: process.env.BOT_USER_ID,
-                        directChatId: chatId,
-                    },
-                    include: {
-                        sender: {
-                            select: { id: true, name: true, avatar: true, username: true }
-                        }, 
-                        attachments: true,
-                    }
-                });
-
-                io.to(chatId).emit("receive_message", botMessage);
-                return res.status(201).json(message);
-            }
-        }
-
-
         // ai microservice - embed new message
         fetch(`${process.env.AI_SERVICE_URL}/embed`, {
             method: "POST",
@@ -219,8 +176,69 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
             })
         }).catch(err => console.error("Embedding failed: ", err))
 
-        io.to(chatId).emit("receive_message", message);
 
+
+        // bot response 
+        if (chatType === "direct") {
+            const chat = await prisma.directChat.findFirst({
+                where: {
+                    id: chatId,
+                    participants: {
+                        some: { userId: process.env.BOT_USER_ID }
+                    }
+                },
+            });
+
+
+            if (chat) {
+                res.status(201).json(message);
+
+                const aiResponse = await fetch(`${process.env.AI_SERVICE_URL}/chat`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        content, 
+                        chatId         // for fetching previous conversations with the bot
+                    })
+                })
+
+                const data = await aiResponse.json();
+
+                const botMessage = await prisma.message.create({
+                    data: {
+                        content: data,
+                        senderId: process.env.BOT_USER_ID,
+                        directChatId: chatId,
+                    },
+                    include: {
+                        sender: {
+                            select: { id: true, name: true, avatar: true, username: true }
+                        },
+                        attachments: true,
+                    }
+                });
+
+                // ai microservice - embed new message
+                fetch(`${process.env.AI_SERVICE_URL}/embed`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        message_id: botMessage.id,
+                        content: botMessage.content
+                    })
+                }).catch(err => console.error("Embedding failed: ", err))
+
+
+
+                io.to(chatId).emit("receive_message", botMessage);
+                return
+            }
+        }
+
+
+
+        io.to(chatId).emit("receive_message", message);
         return res.status(201).json(message);
 
 

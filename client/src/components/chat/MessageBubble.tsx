@@ -159,7 +159,7 @@ const MessageBubble = ({ message, showDateLabel }: Props) => {
 
           {hasText && (
             <div className={
-              `px-4 py-2.5 rounded-full text-sm leading-none wrap-break-words 
+              `px-4 py-2.5 rounded-3xl text-sm leading-none wrap-break-words 
             ${isMe ?
                 "bg-violet-500 text-white rounded-br-none" :
                 "bg-[#1e2023] text-gray-100 rounded-bl-none"
