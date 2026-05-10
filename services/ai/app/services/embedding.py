@@ -5,6 +5,8 @@ client = voyageai.AsyncClient(api_key=settings.VOYAGE_API_KEY)
 
 async def embed(text: str) -> list[float]:
     try:
+        if not text or not text.strip():
+            raise ValueError("Cannot embed empty string")
         result = await client.embed(
             texts=[text],
             model="voyage-4-lite",

@@ -12,6 +12,8 @@ tools = [
         "function": {
             "name": "search_messages", 
             "description": """
+            Use this tool ONLY when the user is looking for specific messages or wants to know if something was said.
+            Do NOT use this for summarizing entire conversations.
             Search through messages semantically. Use when user asks if they every said something or if they every said something to someone specific (based on username). 
             Examples: 
             1) If the user asks, did i ever talk about pets with @patrick? In this explanation @patrick is the user name, and the tool takes patrick (without the @) as the parameter. 
@@ -44,6 +46,8 @@ tools = [
         "function": {
             "name": "summarize_conversation",
             "description": """
+            Use this tool ONLY when the user explicitly asks to summarize or get an overview of a conversation. 
+            Do NOT use this for searching specific messages.
             Summarize the conversation with a specific person or summarize the conversation with a specific person on a given date range.
             Use when user asks to summarize a conversation or what was discussed with someone particular. 
             Optionally, the conversation can be filtered by a start_date and end_date if the user asks so. 
@@ -255,6 +259,8 @@ async def handle_chat(user_id: str, message: str, chat_id: str, pool):
                 When presenting search results, always mention who the message was sent to or received from.
 
                 You have access to the full conversation history with the user. Use it to answer questions about previous messages directly without searching the database.
+
+                Always focus on the user's most recent request. Previous tool results are for context only — do not repeat or default to them.
             """
         }
     
