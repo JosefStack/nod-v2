@@ -192,13 +192,14 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
 
             if (chat) {
                 res.status(201).json(message);
-                
+
                 const aiResponse = await fetch(`${process.env.AI_SERVICE_URL}/chat`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         user_id: userId,
-                        content
+                        content, 
+                        chatId         // for fetching previous conversations with the bot
                     })
                 })
 

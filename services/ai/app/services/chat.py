@@ -19,6 +19,8 @@ tools = [
 
             If the user mentions a name without an @, ask the user to specify the correct username with an @. While calling the function, call without @ in the username.
             If the user's question is not clear, or does not provide a clear hint regarding the parameters, ask the user to clarify. 
+
+
             """,
             "parameters": {
                 "type": "object",
@@ -96,6 +98,32 @@ async def fetch_chat_id(user_id: str, username: str, conn):
     return chat['chatId']
 
 
+async def fetch_conversations(chat_id, pool):
+    async with pool.acquire() as conn:
+        messages = await conn.fetch(
+            """
+                SELECT content, "senderId"
+                FROM messages
+                WHERE "directChatId" = $1
+                AND content IS NOT NULL
+                ORDER BY "createdAt" ASC
+                LIMIT 50
+            """, 
+            chat_id
+        )   
+
+        history = []
+        for row in messages:
+            role = "assistant" if row['senderId'] == settings.BOT_USER_ID else "user"
+            history.append({
+                "role": role,
+                "content": row['content']
+            })
+
+        return history
+
+
+
 async def search_messages(user_id: str, query: str, pool, username: str | None = None):
     embedding = await embed(query)
     async with pool.acquire() as conn:
@@ -120,15 +148,21 @@ async def search_messages(user_id: str, query: str, pool, username: str | None =
                     LIMIT 10
                 """, 
                 chat_id, embedding
-            )   
-
+            )  
             return [dict(row) for row in messages]
         
         else:
             # global search - did i every say this to anyone / did anyone every say this to me
             messages = await conn.fetch(
                 """
-                    SELECT msg.content, msg."createdAt", u.username as sender
+                    SELECT msg.content, msg."createdAt", u.username as sender, (
+                        SELECT u2.username 
+                        FROM direct_chat_participants dcp 
+                        JOIN users u2 ON u2.id = dcp."userId"
+                        WHERE dcp."chatId" = msg."directChatId" 
+                        AND dcp."userId" <> msg."senderId"
+                        LIMIT 1
+                    ) as receiver
                     FROM messages msg 
                     JOIN users u ON msg."senderId" = u.id
                     WHERE(
@@ -145,7 +179,6 @@ async def search_messages(user_id: str, query: str, pool, username: str | None =
                 """,
                 user_id, embedding
             )
-
             return [dict(row) for row in messages]
 
 
@@ -203,24 +236,33 @@ async def execute_tool_call(tc, user_id, pool, messages):
             "content": "No available function to execute."
         })
 
-async def handle_chat(user_id: str, message: str, pool):
-    messages = [
-        {
+async def handle_chat(user_id: str, message: str, chat_id: str, pool):
+    history = await fetch_conversations(chat_id, pool)
+
+    systemPrompt = {
             "role": "system",
             "content": """
                 You are Nod Bot, a helpful assistant built into the Nod chat app.
                 You can search through the user's messages and summarize conversations.
                 Always refer to users by their @username. 
-                If a user asks you to summarize a conversation with somone, or asks you to search your messages with someone specific, make sure the user is providing the username in @username format. 
+                If a user asks you to summarize a conversation with someone, or asks you to search your messages with someone specific, make sure the user is providing the username in @username format. 
                 If not, ask the user to clarify and provide the correct username in @username format. 
                 When calling tools, do not include @ in the username, only use the username text (excluding @). 
+
+                When presenting search results or summaries, use plain conversational text. 
+                Do not use markdown tables, bullet points with pipes, or complex formatting.
+                Keep responses concise and natural, as if you're a helpful chat assistant.
+                When presenting search results, always mention who the message was sent to or received from.
             """
-        }, 
-        {
-            "role": "user",
-            "content": message
         }
+    
+    messages = [
+        systemPrompt, 
+        *history,
+        { "role": "user", "content": message }
     ]
+
+    print(messages)
 
     while True:
         response = await groq.chat.completions.create(

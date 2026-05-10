@@ -8,7 +8,7 @@ router = APIRouter()
 @router.post("/chat")
 async def chat(body: ChatRequest, request: Request):
     try: 
-        reply = await handle_chat(body.user_id, body.content, request.app.state.pool)
+        reply = await handle_chat(body.user_id, body.content, body.chatId, request.app.state.pool)
         return reply
     except Exception as e:
         print(f"Chat error: ", e)
