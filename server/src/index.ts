@@ -46,6 +46,10 @@ app.use('/api/message', messageRouter);
 app.all('/api/auth/{*any}', toNodeHandler(auth));
 
 
+app.get('/health', (req, res) => {
+    res.status(200).json({"status" : "ok"})
+})
+
 
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
