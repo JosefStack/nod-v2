@@ -106,7 +106,7 @@ async def fetch_conversations(chat_id, pool):
                 FROM messages
                 WHERE "directChatId" = $1
                 AND content IS NOT NULL
-                ORDER BY "createdAt" ASC
+                ORDER BY "createdAt" DESC
                 LIMIT 50
             """, 
             chat_id
@@ -264,7 +264,9 @@ async def handle_chat(user_id: str, message: str, chat_id: str, pool):
         { "role": "user", "content": message }
     ]
 
-    print(messages)
+    for msg in messages:
+        print(" -->  ", msg)
+
 
     while True:
         response = await groq.chat.completions.create(
