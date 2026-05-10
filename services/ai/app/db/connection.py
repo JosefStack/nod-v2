@@ -3,7 +3,10 @@ from app.config import settings
 
 async def init_pool(app):
     try:
-        app.state.pool = await asyncpg.create_pool(settings.DATABASE_URL)
+        app.state.pool = await asyncpg.create_pool(
+            settings.DATABASE_URL,
+            statement_cache_size=0
+        )
         print(" --> Database pool created successfully <-- ")
     except Exception as e:
         print(f"Failed to create databse pool: {e}")

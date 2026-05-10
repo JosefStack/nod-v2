@@ -3,6 +3,7 @@ import { AuthRequest } from "../middleware/auth.middleware.js";
 import { prisma } from "../lib/prisma.js";
 import cloudinary from "../lib/cloudinary.js";
 import { io } from "../lib/socket.js";
+import { tuple } from "better-auth";
 
 
 
@@ -166,16 +167,19 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
             }
         });
 
+
+
         // bot response 
         if (chatType === "direct") {
             const chat = await prisma.directChat.findFirst({
                 where: {
-                    id: chatId,
+                    id: chatId, 
                     participants: {
                         some: { userId: process.env.BOT_USER_ID }
                     }
-                }
+                },
             });
+
 
             if (chat) {
                 const aiResponse = await fetch(`${process.env.AI_SERVICE_URL}/chat`, {
@@ -183,7 +187,7 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         user_id: userId,
-                        message: content,
+                        content
                     })
                 })
 
@@ -191,7 +195,7 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
 
                 const botMessage = await prisma.message.create({
                     data: {
-                        content: data.reply,
+                        content: data,
                         senderId: process.env.BOT_USER_ID,
                         directChatId: chatId,
                     },
@@ -202,6 +206,8 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
                         attachments: true,
                     }
                 });
+
+                // console.log(botMessage)
 
                 io.to(chatId).emit("receive_message", botMessage);
                 return res.status(201).json(message);

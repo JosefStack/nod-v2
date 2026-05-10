@@ -22,6 +22,8 @@ async def embed_message(body: EmbedRequest, request: Request):
             if result == "UPDATE 0":
                 raise HTTPException(status_code=404, detail="message not found") 
 
+            print(result)
+
         return { "success": True }
 
     except Exception as e:

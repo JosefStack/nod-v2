@@ -80,11 +80,11 @@ tools = [
 async def fetch_chat_id(user_id: str, username: str, conn):
     chat = await conn.fetchrow(
                 """
-                    SELECT dcp1.chat_id
+                    SELECT dcp1."chatId"
                     FROM direct_chat_participants dcp1
-                    JOIN direct_chat_participants dcp2 ON dcp2.chat_id = dcp1.chat_id AND dcp1.user_id = $1
-                    JOIN users u ON u.id = dcp2.user_id
-                    WHERE dcp2.user_id <> $1
+                    JOIN direct_chat_participants dcp2 ON dcp2."chatId" = dcp1."chatId" AND dcp1."userId" = $1
+                    JOIN users u ON u.id = dcp2."userId"
+                    WHERE dcp2."userId" <> $1
                     AND u.username = $2
                 """, 
                 user_id, username
@@ -112,8 +112,8 @@ async def search_messages(user_id: str, username: str | None, query: str, pool):
                 """
                     SELECT msg.content, msg.created_at, u.username as sender
                     FROM messages msg
-                    JOIN users u ON msg.sender_id = u.id
-                    WHERE msg.direct_chat_id = $1 
+                    JOIN users u ON msg."senderId" = u.id
+                    WHERE msg."directChatId" = $1 
                     AND msg.embedding IS NOT NULL
                     ORDER BY msg.embedding <=> $2
                     LIMIT 10
@@ -148,7 +148,7 @@ async def search_messages(user_id: str, username: str | None, query: str, pool):
             return [dict(row) for row in messages]
 
 
-async def summarize_conversation(user_id: str, username: str, start_date: str | None, end_date: str | None, pool):
+async def summarize_conversation(user_id: str, username: str, pool, start_date: str | None = None, end_date: str | None = None):
     async with pool.acquire() as conn:
         chat_id = await fetch_chat_id(user_id, username, conn)
         if not chat_id:
@@ -157,7 +157,7 @@ async def summarize_conversation(user_id: str, username: str, start_date: str | 
         query = """
             SELECT msg.content, msg.created_at, u.username as sender
             FROM messages msg
-            JOIN users u ON u.id = msg.sender_id
+            JOIN users u ON u.id = msg."senderId"
             WHERE msg.direct_chat_id = $1
         """
 
@@ -184,9 +184,9 @@ available_functions = {
 # tc -> tool call
 async def execute_tool_call(tc, user_id, pool, messages):
     function_name = tc.function.name
-    function_to_call = available_functions[function_name]
+    function_to_call = available_functions.get(function_name)
     function_args = json.loads(tc.function.arguments)
-    if function_name in available_functions:
+    if function_to_call:
         result = await function_to_call(user_id=user_id, pool=pool, **function_args,)
         messages.append({
             "role": "tool",
@@ -229,7 +229,7 @@ async def handle_chat(user_id: str, message: str, pool):
         )
 
         choice = response.choices[0]
-
+        # print(choice.message.tool_calls)
         if choice.finish_reason == "tool_calls":
             messages.append(choice.message)
 
@@ -238,4 +238,3 @@ async def handle_chat(user_id: str, message: str, pool):
 
         else:
             return choice.message.content
-    
