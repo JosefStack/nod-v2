@@ -149,6 +149,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
     initSocketListeners: (socket: Socket) => {
 
+        console.log("initSocketListeners called, socket id:", socket.id)
         socket.off("online_users");
         socket.off("user_online");
         socket.off("user_offline");

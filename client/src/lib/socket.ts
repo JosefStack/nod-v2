@@ -1,11 +1,12 @@
 import { io, Socket } from "socket.io-client";
 
-const SOCKET_URL = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3000";
+const SOCKET_URL = import.meta.env.PROD ? import.meta.env.VITE_API_URL?.replace("/api", "") : "http://localhost:3000";
 
 let socket: Socket | null = null;
 
 export const connectSocket = (token?: string): Socket => {
     if (socket && socket.connected) return socket;
+    if (socket) socket.disconnect();
 
     socket = io(SOCKET_URL, {
         withCredentials: true,

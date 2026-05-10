@@ -146,6 +146,8 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
 
         if (!chatRelation) return res.status(400).json({ message: "Invalid chat type" });
 
+
+
         //  content, attachments, chatType, chatId
         const message = await prisma.message.create({
             data: {
@@ -164,21 +166,33 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
             }
         });
 
+        // ai microservice - embed new message
+        fetch(`${process.env.AI_SERVICE_URL}/embed`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                message_id: message.id,
+                content: message.content
+            })
+        }).catch(err => console.error("Embedding failed: ", err))
+
 
 
         // bot response 
         if (chatType === "direct") {
             const chat = await prisma.directChat.findFirst({
                 where: {
-                    id: chatId, 
+                    id: chatId,
                     participants: {
                         some: { userId: process.env.BOT_USER_ID }
                     }
                 },
             });
 
-            
+
             if (chat) {
+                res.status(201).json(message);
+                
                 const aiResponse = await fetch(`${process.env.AI_SERVICE_URL}/chat`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -199,35 +213,31 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
                     include: {
                         sender: {
                             select: { id: true, name: true, avatar: true, username: true }
-                        }, 
+                        },
                         attachments: true,
                     }
                 });
 
-                // console.log(botMessage)
+                // ai microservice - embed new message
+                fetch(`${process.env.AI_SERVICE_URL}/embed`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        message_id: botMessage.id,
+                        content: botMessage.content
+                    })
+                }).catch(err => console.error("Embedding failed: ", err))
 
-                console.log("Rooms for chatId:", io)
 
 
                 io.to(chatId).emit("receive_message", botMessage);
-                console.log("message emitted")
-                return res.status(201).json(message);
+                return
             }
         }
 
 
-        // ai microservice - embed new message
-        fetch(`${process.env.AI_SERVICE_URL}/embed`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                message_id: message.id,
-                content: message.content
-            })
-        }).catch(err => console.error("Embedding failed: ", err))
 
         io.to(chatId).emit("receive_message", message);
-
         return res.status(201).json(message);
 
 

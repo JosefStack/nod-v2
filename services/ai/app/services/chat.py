@@ -28,7 +28,7 @@ tools = [
                         "description": "The search query."
                     }, 
                     "username": {
-                        "type": "string",
+                        "type": ["string", "null"],
                         "description": "Optional. The username of the person to scope the search to. Do not include @ in the string."
                     }
                 },
