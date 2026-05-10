@@ -85,23 +85,24 @@ async def fetch_chat_id(user_id: str, username: str, conn):
                     JOIN direct_chat_participants dcp2 ON dcp2."chatId" = dcp1."chatId" AND dcp1."userId" = $1
                     JOIN users u ON u.id = dcp2."userId"
                     WHERE dcp2."userId" <> $1
-                    AND u.username = $2
+                    AND LOWER(u.username) = $2
                 """, 
-                user_id, username
+                user_id, username.lower()
             )
-    
     if not chat:
         return None
     
+    print(chat)
     return chat['chatId']
 
 
-async def search_messages(user_id: str, username: str | None, query: str, pool):
+async def search_messages(user_id: str, query: str, pool, username: str | None = None):
     embedding = await embed(query)
     async with pool.acquire() as conn:
         await register_vector(conn, schema="extensions")
         
         if username:
+
             # search based on username - did i every say this to @person / has this @person ever told me this
             chat_id = await fetch_chat_id(user_id, username, conn)
 
@@ -127,15 +128,15 @@ async def search_messages(user_id: str, username: str | None, query: str, pool):
             # global search - did i every say this to anyone / did anyone every say this to me
             messages = await conn.fetch(
                 """
-                    SELECT msg.content, msg.created_at, u.username as sender
+                    SELECT msg.content, msg."createdAt", u.username as sender
                     FROM messages msg 
-                    JOIN users u ON msg.sender_id = u.id
+                    JOIN users u ON msg."senderId" = u.id
                     WHERE(
-                        msg.direct_chat_id IN (
-                            SELECT chat_id FROM direct_chat_participants WHERE user_id = $1
+                        msg."directChatId" IN (
+                            SELECT "chatId" FROM direct_chat_participants WHERE "userId" = $1
                         ) 
-                        OR msg.group_id IN (
-                            SELECT group_id FROM group_members WHERE user_id = $1
+                        OR msg."groupId" IN (
+                            SELECT "groupId" FROM group_members WHERE "userId" = $1
                         )
                     )
                     AND msg.embedding IS NOT NULL
@@ -155,22 +156,22 @@ async def summarize_conversation(user_id: str, username: str, pool, start_date: 
             return {"error": f"No direct chat found with @{username}"}
         
         query = """
-            SELECT msg.content, msg.created_at, u.username as sender
+            SELECT msg.content, msg."createdAt", u.username as sender
             FROM messages msg
             JOIN users u ON u.id = msg."senderId"
-            WHERE msg.direct_chat_id = $1
+            WHERE msg."directChatId" = $1
         """
 
         params=[chat_id]
 
         if start_date:
             params.append(start_date)
-            query += f" AND msg.created_at >= ${len(params)}"
+            query += f' AND msg."createdAt" >= ${len(params)}'
         if end_date:
             params.append(end_date)
-            query += f" AND msg.created_at <= ${len(params)}"
+            query += f' AND msg."createdAt" <= ${len(params)}'
 
-        query += " ORDER BY msg.created_at ASC"
+        query += ' ORDER BY msg."createdAt" ASC'
 
         messages = await conn.fetch(query, *params)
         return [dict(row) for row in messages]
@@ -223,13 +224,13 @@ async def handle_chat(user_id: str, message: str, pool):
 
     while True:
         response = await groq.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-120b",
             messages=messages,
             tools=tools,
         )
 
         choice = response.choices[0]
-        # print(choice.message.tool_calls)
+        print(choice.message.tool_calls)
         if choice.finish_reason == "tool_calls":
             messages.append(choice.message)
 
