@@ -93,7 +93,7 @@ async def fetch_chat_id(user_id: str, username: str, conn):
     if not chat:
         return None
     
-    return chat['chat_id']
+    return chat['chatId']
 
 
 async def search_messages(user_id: str, username: str | None, query: str, pool):
@@ -110,7 +110,7 @@ async def search_messages(user_id: str, username: str | None, query: str, pool):
             
             messages = await conn.fetch(
                 """
-                    SELECT msg.content, msg.created_at, u.username as sender
+                    SELECT msg.content, msg."createdAt", u.username as sender
                     FROM messages msg
                     JOIN users u ON msg."senderId" = u.id
                     WHERE msg."directChatId" = $1 
