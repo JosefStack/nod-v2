@@ -3,9 +3,6 @@ import { AuthRequest } from "../middleware/auth.middleware.js";
 import { prisma } from "../lib/prisma.js";
 import cloudinary from "../lib/cloudinary.js";
 import { io } from "../lib/socket.js";
-import { tuple } from "better-auth";
-
-
 
 
 export const getAllMessages = async (req: AuthRequest, res: Response) => {
@@ -180,7 +177,7 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
                 },
             });
 
-
+            
             if (chat) {
                 const aiResponse = await fetch(`${process.env.AI_SERVICE_URL}/chat`, {
                     method: "POST",
@@ -209,7 +206,11 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
 
                 // console.log(botMessage)
 
+                console.log("Rooms for chatId:", io)
+
+
                 io.to(chatId).emit("receive_message", botMessage);
+                console.log("message emitted")
                 return res.status(201).json(message);
             }
         }

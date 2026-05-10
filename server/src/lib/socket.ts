@@ -97,6 +97,7 @@ io.on("connection", async (socket) => {
 
 const joinUserRooms = async (socket: Socket, userId: string, username: string) => {
     try {
+        console.log(`Joining rooms for ${username}`)
         const [directChats, groups] = await Promise.all([
             prisma.directChat.findMany({
                 where: { participants: { some: { userId } } },
@@ -113,6 +114,7 @@ const joinUserRooms = async (socket: Socket, userId: string, username: string) =
             ...groups.map((g) => g.id),
         ];
 
+        console.log(`Joining rooms for ${username}:`, roomIds)
         socket.join(roomIds);
         console.log(`${username} joined ${roomIds.length} rooms`);
     } catch (err) {

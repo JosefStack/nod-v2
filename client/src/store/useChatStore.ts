@@ -171,7 +171,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         });
 
         socket.on("receive_message", (message: Message) => {
+            console.log("receive_message")
             const { activeChat } = get();
+            console.log("receive")
 
             if (message.senderId === useAuthStore.getState().user?.id) {
                 get().fetchChats();
