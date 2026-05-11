@@ -107,7 +107,7 @@ async def fetch_conversations(chat_id, pool):
         messages = await conn.fetch(
             """
                 SELECT * FROM (
-                    SELECT content, "senderId"
+                    SELECT content, "senderId", "createdAt"
                     FROM messages
                     WHERE "directChatId" = $1
                     AND content IS NOT NULL
