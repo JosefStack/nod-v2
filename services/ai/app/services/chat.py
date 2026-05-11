@@ -106,15 +106,36 @@ async def fetch_conversations(chat_id, pool):
     async with pool.acquire() as conn:
         messages = await conn.fetch(
             """
-                SELECT content, "senderId"
-                FROM messages
-                WHERE "directChatId" = $1
-                AND content IS NOT NULL
-                ORDER BY "createdAt" DESC
-                LIMIT 50
+                SELECT * FROM (
+                    SELECT content, "senderId"
+                    FROM messages
+                    WHERE "directChatId" = $1
+                    AND content IS NOT NULL
+                    ORDER BY "createdAt" DESC
+                    LIMIT 50
+                    ) sub
+                ORDER BY "createdAt" ASC
             """, 
             chat_id
         )   
+
+        # fetching using order by desc will generate records like this:
+        # [
+        #     {last message}
+        #     {last message - 1}
+        #     ...
+        #     {last message - 49}
+        # ]
+
+        # but it should be 
+        # [
+        #     {last message - 49}
+        #     ...
+        #     {last message}
+        # ]
+
+        # so we make it a subquery and then add another order by asc 
+
 
         history = []
         for row in messages:
