@@ -258,8 +258,6 @@ async def handle_chat(user_id: str, message: str, chat_id: str, pool):
                 Keep responses concise and natural, as if you're a helpful chat assistant.
                 When presenting search results, always mention who the message was sent to or received from.
 
-                You have access to the full conversation history with the user. Use it to answer questions about previous messages directly without searching the database.
-
                 Always focus on the user's most recent request. Previous tool results are for context only — do not repeat or default to them.
             """
         }
