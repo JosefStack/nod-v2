@@ -1,0 +1,17 @@
+services:
+  server:
+    build:
+      context: ./server
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./server/.env
+    depends_on:
+      - ai-service
+
+  ai-service:
+    build:
+      context: ./services/ai
+    env_file:
+      - ./services/ai/.env
+
