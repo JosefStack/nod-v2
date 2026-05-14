@@ -4,6 +4,9 @@ from app.config import settings
 from app.services.embedding import embed
 from pgvector.asyncpg import register_vector
 
+
+from app.utils.rerank import rerank
+
 groq = AsyncGroq(api_key=settings.GROQ_API_KEY)
 
 tools = [
@@ -162,9 +165,10 @@ async def search_messages(user_id: str, query: str, pool, username: str | None =
             if not chat_id:
                 return {"error": f"No direct chat found with @{username}"}
             
-            messages = await conn.fetch(
+            # vector search
+            vector_results = await conn.fetch(
                 """
-                    SELECT msg.content, msg."createdAt", u.username as sender
+                    SELECT msg.id, msg.content, msg."createdAt", u.username as sender
                     FROM messages msg
                     JOIN users u ON msg."senderId" = u.id
                     WHERE msg."directChatId" = $1 
@@ -174,7 +178,53 @@ async def search_messages(user_id: str, query: str, pool, username: str | None =
                 """, 
                 chat_id, embedding
             )  
-            return [dict(row) for row in messages]
+
+            # keyword search
+            keyword_results = await conn.fetch(
+                """
+                    SELECT 
+                        msg.id,
+                        msg.content, 
+                        ts_rank(fts, plainto_tsquery('english', $1)) AS rank,
+                        msg."createdAt",
+                        u.username as sender
+                    FROM messages msg
+                    JOIN users u ON msg."senderId" = u.id
+                    WHERE msg."directChatId" = $2
+                    AND fts @@ plainto_tsquery('english', $1)
+                    ORDER BY rank DESC
+                    LIMIT 10
+                """, query, chat_id
+            )
+
+            combined = [*vector_results, *keyword_results]
+            seen = set()    
+            deduplicated = []
+
+            for row in combined:
+                if row['id'] not in seen:
+
+                    deduplicated.append({
+                        "id": row['id'],
+                        "content": row['content'],
+                        "sender": row['sender'],
+                        "createdAt": row['createdAt']
+                    })
+
+                    seen.add(row['id'])
+
+            texts = [row['content'] for row in deduplicated]
+            
+            reranked_index = rerank(query, texts)
+
+            reranked_results = []
+            for (corpus_id, score) in reranked_index:
+                item = deduplicated[corpus_id]
+                item['score'] = score
+                reranked_results.append(item)
+
+
+            return [row for row in reranked_results]
         
         else:
             # global search - did i every say this to anyone / did anyone every say this to me
