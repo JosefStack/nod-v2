@@ -228,9 +228,11 @@ async def search_messages(user_id: str, query: str, pool, username: str | None =
         
         else:
             # global search - did i every say this to anyone / did anyone every say this to me
-            messages = await conn.fetch(
+
+            # vector search
+            vector_results = await conn.fetch(
                 """
-                    SELECT msg.content, msg."createdAt", u.username as sender, (
+                    SELECT msg.id, msg.content, msg."createdAt", u.username as sender, (
                         SELECT u2.username 
                         FROM direct_chat_participants dcp 
                         JOIN users u2 ON u2.id = dcp."userId"
@@ -244,9 +246,6 @@ async def search_messages(user_id: str, query: str, pool, username: str | None =
                         msg."directChatId" IN (
                             SELECT "chatId" FROM direct_chat_participants WHERE "userId" = $1
                         ) 
-                        OR msg."groupId" IN (
-                            SELECT "groupId" FROM group_members WHERE "userId" = $1
-                        )
                     )
                     AND msg.embedding IS NOT NULL
                     ORDER BY msg.embedding <=> $2
@@ -254,7 +253,66 @@ async def search_messages(user_id: str, query: str, pool, username: str | None =
                 """,
                 user_id, embedding
             )
-            return [dict(row) for row in messages]
+
+            # keyword search 
+            keyword_results = await conn.fetch(
+                """
+                    SELECT 
+                        msg.id,
+                        msg.content,
+                        ts_rank(fts, plainto_tsquery('english', $1)) AS rank,
+                        msg."createdAt",
+                        u.username as sender, (
+                        SELECT u2.username 
+                        FROM direct_chat_participants dcp 
+                        JOIN users u2 ON u2.id = dcp."userId"
+                        WHERE dcp."chatId" = msg."directChatId" 
+                        AND dcp."userId" <> msg."senderId"
+                        LIMIT 1
+                    ) as receiver
+                    FROM messages msg 
+                    JOIN users u ON msg."senderId" = u.id
+                    WHERE(
+                        msg."directChatId" IN (
+                            SELECT "chatId" FROM direct_chat_participants WHERE "userId" = $2
+                        )
+                    )
+                    AND fts @@ plainto_tsquery('english', $1)
+                    ORDER BY rank DESC
+                    LIMIT 10
+                """, 
+                query, user_id
+            )
+
+            combined = [*vector_results, *keyword_results]
+            seen = set()    
+            deduplicated = []
+
+            for row in combined:
+                if row['id'] not in seen:
+
+                    deduplicated.append({
+                        "id": row['id'],
+                        "content": row['content'],
+                        "sender": row['sender'],
+                        "receiver": row['receiver'],
+                        "createdAt": row['createdAt']
+                    })
+
+                    seen.add(row['id'])
+
+            texts = [row['content'] for row in deduplicated]
+            
+            reranked_index = rerank(query, texts)
+
+            reranked_results = []
+            for (corpus_id, score) in reranked_index:
+                item = deduplicated[corpus_id]
+                item['score'] = score
+                reranked_results.append(item)
+
+
+            return [row for row in reranked_results]
 
 
 async def summarize_conversation(user_id: str, username: str, pool, start_date: str | None = None, end_date: str | None = None):
