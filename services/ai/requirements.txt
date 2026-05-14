@@ -37,4 +37,3 @@ urllib3==2.7.0
 uvicorn==0.46.0
 voyageai==0.2.4
 yarl==1.23.0
-sentence-transformers==5.5.0
