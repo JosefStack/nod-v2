@@ -215,7 +215,7 @@ async def search_messages(user_id: str, query: str, pool, username: str | None =
 
             texts = [row['content'] for row in deduplicated]
             
-            reranked_index = rerank(query, texts)
+            reranked_index = await rerank(query, texts)
 
             reranked_results = []
             for (corpus_id, score) in reranked_index:
@@ -303,7 +303,7 @@ async def search_messages(user_id: str, query: str, pool, username: str | None =
 
             texts = [row['content'] for row in deduplicated]
             
-            reranked_index = rerank(query, texts)
+            reranked_index = await rerank(query, texts)
 
             reranked_results = []
             for (corpus_id, score) in reranked_index:
